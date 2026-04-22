@@ -1,0 +1,53 @@
+html, 
+body {
+    padding: 0;
+    margin: 0;
+    background-color: #333;
+}
+
+h4 {
+    padding: 0;
+    margin: 0; 
+}
+
+.login_wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.login_wrap .login_form_wrap {
+    background: #fff;
+    padding: 25px;
+    width: 300px;
+}
+.login_wrap .login_form_wrap label {
+    display: block;
+    font-size: 14px;
+    padding-bottom: 5px;
+}
+.login_wrap .login_form_wrap .form-group {
+    padding-top: 20px;
+}
+
+.login_wrap .login_form_wrap .form-group input {
+    box-sizing: border-box;
+    height: 35px;
+    padding: 0px 10px;
+    width: 100%;
+}
+
+button.btn-primary {
+    width: 100%;
+    margin-top: 15px;
+    height: 35px;
+    background: #333;
+    color: #fff;
+    border: none;
+    transition: 0.3s;
+}
+
+button.btn-primary:hover {
+    background: #000;
+    transition: 0.3s;
+}

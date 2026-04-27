@@ -1,65 +1,134 @@
-import Image from "next/image";
+"use client";
 
-export default function Welcome() {
+import { useState, useEffect } from "react";
+
+
+const now = new Date();
+const DAY = now.toLocaleDateString("en-US", { weekday: "long" });
+const DATE = now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+const MOCK_ACTIVITY = [
+  { icon: "🚗", main: "2023 BMW M3 added to inventory", sub: "VIN: WBS8M9C59J5L12345", time: "9:41 AM" },
+  { icon: "💰", main: "Sale closed — 2022 Audi Q7", sub: "Customer: R. Thompson · $58,400", time: "8:15 AM" },
+  { icon: "🔧", main: "Service completed — 2021 Ford F-150", sub: "Oil change & tire rotation", time: "Yesterday" },
+  { icon: "📋", main: "Appraisal submitted — 2019 Honda CR-V", sub: "Trade-in estimate: $19,200", time: "Yesterday" },
+  { icon: "📦", main: "Lot transfer — 3 vehicles moved to Lot B", sub: "Sedan section, Row 4", time: "Mon" },
+];
+
+const MOCK_ALERTS = [
+  { critical: false, bold: "7 vehicles", text: " have been on lot for 60+ days" },
+  { critical: true, bold: "Insurance docs missing", text: " for 3 vehicles — action required" },
+  { critical: false, bold: "Inventory audit", text: " scheduled for Friday, May 3" },
+];
+
+interface WelcomeProps {
+  user?: {
+    firstName: string;
+    role: string;
+  };
+  onNavigate?: (route: string) => void;
+}
+
+export default function Welcome({ user = { firstName: "Alex", role: "Sales Associate" }, onNavigate }: WelcomeProps) {
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : "Good Evening");
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <div className="welcome-root">
+        {/* Hero */}
+        <div className="hero">
+          <div className="hero-glow" />
+          <div className="hero-eyebrow">{greeting}</div>
+          <div className="hero-title">
+            Welcome Back,<br />
+            <span className="name-highlight">{user.firstName}.</span>
+          </div>
+          <div className="hero-subtitle">
+            Here's what's happening at Apex Motors today. You're logged in as <strong style={{color:"var(--platinum)"}}>{user.role}</strong>.
+          </div>
+          <div className="hero-date">
+            <div className="hero-date-day">{now.getDate()}</div>
+            <div className="hero-date-label">{DAY.toUpperCase()} · {now.toLocaleDateString("en-US", { month: "short", year: "numeric" }).toUpperCase()}</div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stats */}
+        <div className="stats-row">
+          {[
+            { label: "Vehicles on Lot", value: "247", delta: "▲ 12 this week", up: true },
+            { label: "Sales This Month", value: "38", delta: "▲ 6 vs last month", up: true, gold: true },
+            { label: "Avg. Days on Lot", value: "31", delta: "▼ 4 days", up: true },
+            { label: "Pending Appraisals", value: "9", delta: "▼ 2 from yesterday", up: false },
+          ].map((s) => (
+            <div key={s.label} className="stat-card">
+              <div className="stat-label">{s.label}</div>
+              <div className={`stat-value${s.gold ? " gold" : ""}`}>{s.value}</div>
+              <div className={`stat-delta${!s.up ? " down" : ""}`}>{s.delta}</div>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+
+        {/* Content */}
+        <div className="content-area">
+          <div className="main-col">
+            <div className="section-header">
+              <div className="section-title">Recent Activity</div>
+              <span className="section-link" onClick={() => onNavigate?.("inventory")}>View All →</span>
+            </div>
+            <div className="activity-list">
+              {MOCK_ACTIVITY.map((a, i) => (
+                <div key={i} className="activity-item">
+                  <div className="activity-icon">{a.icon}</div>
+                  <div className="activity-text">
+                    <div className="activity-main">{a.main}</div>
+                    <div className="activity-sub">{a.sub}</div>
+                  </div>
+                  <div className="activity-time">{a.time}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="side-col">
+            <div className="section-header">
+              <div className="section-title">Quick Actions</div>
+            </div>
+            <div className="quick-actions">
+              {[
+                { icon: "➕", label: "Add Vehicle", sub: "List new unit", nav: "inventory" },
+                { icon: "🔍", label: "Search Lot", sub: "Find by VIN", nav: "lot" },
+                { icon: "📊", label: "Reports", sub: "Sales data", nav: "inventory" },
+                { icon: "👤", label: "My Profile", sub: "Edit account", nav: "profile" },
+              ].map((a) => (
+                <button key={a.label} className="action-btn" onClick={() => onNavigate?.(a.nav)}>
+                  <div className="action-icon">{a.icon}</div>
+                  <span className="action-label">{a.label}</span>
+                  <span className="action-sub">{a.sub}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="section-header">
+              <div className="section-title">Alerts</div>
+            </div>
+            <div className="alert-list">
+              {MOCK_ALERTS.map((a, i) => (
+                <div key={i} className={`alert-item${a.critical ? " critical" : ""}`}>
+                  <div className="alert-dot" />
+                  <div className="alert-text">
+                    <span className="alert-bold">{a.bold}</span>{a.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

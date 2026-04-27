@@ -1,0 +1,199 @@
+  :root {
+    --obsidian: #0a0a0b;
+    --carbon:   #141416;
+    --graphite: #1e1e22;
+    --chrome:   #c0c0c8;
+    --platinum: #e8e8ef;
+    --gold:     #c9a84c;
+    --gold-light: #f0d080;
+    --crimson:  #c0392b;
+  }
+
+  .login-root {
+    min-height: 100vh;
+    background: var(--obsidian);
+    display: flex;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* subtle background glows – no animation */
+  .login-bg-art {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .login-bg-art::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+  }
+  .login-bg-art::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,57,43,0.05) 0%, transparent 70%);
+  }
+
+  /* Left brand panel */
+  .login-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 64px;
+  }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  .brand-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--platinum);
+  }
+  .login-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 7vw, 96px);
+    line-height: 0.9;
+    color: var(--platinum);
+    margin-bottom: 24px;
+  }
+  .login-headline span { display: block; color: var(--gold); }
+  .login-subtext {
+    color: var(--chrome);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 380px;
+    letter-spacing: 0.3px;
+  }
+  .divider-line {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin: 32px 0;
+  }
+
+  /* Right form panel */
+  .login-right {
+    width: 480px;
+    background: var(--carbon);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 72px 56px;
+    position: relative;
+    z-index: 1;
+    border-left: 1px solid rgba(201,168,76,0.12);
+  }
+  .login-right::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+
+  .form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: var(--platinum);
+    margin-bottom: 8px;
+  }
+  .form-subtitle {
+    color: var(--chrome);
+    font-size: 13px;
+    font-weight: 300;
+    margin-bottom: 40px;
+    letter-spacing: 0.5px;
+  }
+
+  .field-group { margin-bottom: 24px; }
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .field-input {
+    width: 100%;
+    background: var(--graphite);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    color: var(--platinum);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 14px 16px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-bottom-color 0.2s, background 0.2s;
+  }
+  .field-input:focus {
+    border-bottom-color: var(--gold);
+    background: #242428;
+  }
+  .field-input::placeholder { color: rgba(192,192,200,0.3); }
+
+  /* Simple button – highlight on hover only */
+  .btn-login {
+    width: 100%;
+    padding: 15px;
+    background: var(--gold);
+    border: none;
+    color: var(--obsidian);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-login:hover:not(:disabled) { background: var(--gold-light); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .signup-prompt {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--chrome);
+  }
+  .signup-prompt a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .signup-prompt a:hover { color: var(--gold-light); }
+
+  .error-msg {
+    background: rgba(192,57,43,0.12);
+    border-left: 2px solid var(--crimson);
+    color: #e88;
+    font-size: 13px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .login-left  { display: none; }
+    .login-right { width: 100%; border-left: none; padding: 48px 32px; }
+  }

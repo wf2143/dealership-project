@@ -1,5 +1,6 @@
 "use client";
 
+import { PageKey } from "../app/types";
 import { useState, useEffect } from "react";
 
 
@@ -26,7 +27,7 @@ interface WelcomeProps {
     firstName: string;
     role: string;
   };
-  onNavigate?: (route: string) => void;
+  onNavigate?: (route: PageKey) => void;
 }
 
 export default function Welcome({ user = { firstName: "Alex", role: "Sales Associate" }, onNavigate }: WelcomeProps) {
@@ -105,7 +106,7 @@ export default function Welcome({ user = { firstName: "Alex", role: "Sales Assoc
                 { icon: "📊", label: "Reports", sub: "Sales data", nav: "inventory" },
                 { icon: "👤", label: "My Profile", sub: "Edit account", nav: "profile" },
               ].map((a) => (
-                <button key={a.label} className="action-btn" onClick={() => onNavigate?.(a.nav)}>
+                <button key={a.label} className="action-btn" onClick={() => onNavigate?.(a.nav as PageKey)}>
                   <div className="action-icon">{a.icon}</div>
                   <span className="action-label">{a.label}</span>
                   <span className="action-sub">{a.sub}</span>

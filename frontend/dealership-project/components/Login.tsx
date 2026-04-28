@@ -1,8 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from "react";
-import { AuthUser } from "../types";
-import { DEMO_ACCOUNTS } from "../app/page";
-
-const DEMO_PASSWORD = "apexmotors2024";
+import { AuthUser } from "../app/types";
+import { DEMO_ACCOUNTS } from "./Accounts";
 
 interface LoginProps {
   onLogin: (user: AuthUser) => void;
@@ -35,7 +33,7 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
 
     setTimeout(() => {
       const match = DEMO_ACCOUNTS.find(
-        (a) => a.username === form.username && form.password === DEMO_PASSWORD
+        (a) => a.username === form.username && form.password === a.password
       );
       if (match) {
         onLogin(match);

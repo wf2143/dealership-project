@@ -10,10 +10,7 @@ import Inventory from '../components/Inventory';
 import Profile from '../components/myProfile';
 import { AuthUser, PageKey } from "./types";
 
-export { DEMO_ACCOUNTS } from '../components/Accounts';
-
 export default function App(): ReactElement {
-  // App always starts on the login page — user is null until login succeeds
   const [user, setUser] = useState<AuthUser | null>(null);
   const [page, setPage] = useState<PageKey>("login");
 
@@ -41,7 +38,6 @@ export default function App(): ReactElement {
 
   const navigate = (p: PageKey): void => setPage(p);
 
-  // ── Authenticated pages ───────────────────────────────────
   const renderPage = (): ReactElement => {
     switch (page) {
       case "welcome":
@@ -51,7 +47,7 @@ export default function App(): ReactElement {
       case "inventory":
         return <Inventory userRole={user.role} />;
       case "profile":
-        return <Profile />;
+        return <Profile user={user} />;
       default:
         return <Welcome user={user} onNavigate={navigate} />;
     }

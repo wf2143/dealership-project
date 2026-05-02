@@ -1,6 +1,7 @@
+"use client";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { AuthUser } from "../app/types";
-import { DEMO_ACCOUNTS } from "./Accounts";
+import { AuthUser, UserRole } from "../app/types";
+import api from "../api/axiosinstance";
 
 interface LoginProps {
   onLogin: (user: AuthUser) => void;
@@ -10,6 +11,16 @@ interface LoginProps {
 interface LoginForm {
   username: string;
   password: string;
+}
+
+interface EmployeeResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  role: string;
+  hireDate: string;
 }
 
 export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
@@ -22,7 +33,20 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
     setError("");
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleDemoLogin = (): void => {
+    onLogin({
+      id:         1,
+      firstName:  "Demo",
+      lastName:   "User",
+      username:   "admin",
+      email:      "demo@apexmotors.com",
+      role:       "MANAGER" as UserRole,
+      employeeId: "EMP-0001",
+      startDate:  "2024-01-01",
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!form.username || !form.password) {
       setError("Please enter your username and password.");
@@ -30,18 +54,28 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
     }
 
     setLoading(true);
-
-    setTimeout(() => {
-      const match = DEMO_ACCOUNTS.find(
-        (a) => a.username === form.username && form.password === a.password
-      );
-      if (match) {
-        onLogin(match);
-      } else {
-        setError("Invalid username or password.");
-      }
+    try {
+      const res = await api.post<EmployeeResponse>("/api/employees/login", {
+        username: form.username,
+        password: form.password,
+      });
+      const emp = res.data;
+      const authUser: AuthUser = {
+        id:         emp.id,
+        firstName:  emp.firstName,
+        lastName:   emp.lastName,
+        username:   emp.username,
+        email:      emp.email,
+        role:       emp.role as UserRole,
+        employeeId: `EMP-${String(emp.id).padStart(4, "0")}`,
+        startDate:  emp.hireDate ?? "",
+      };
+      onLogin(authUser);
+    } catch {
+      setError("Invalid username or password.");
+    } finally {
       setLoading(false);
-    }, 400); // small delay so it feels like a real request
+    }
   };
 
   return (
@@ -104,6 +138,14 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
 
             <button className="btn-login" type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
+            </button>
+            <button
+              className="btn-login"
+              type="button"
+              onClick={handleDemoLogin}
+              style={{ marginTop: "0.5rem", opacity: 0.75 }}
+            >
+              Demo Login
             </button>
           </form>
 

@@ -1,25 +1,22 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+"use client";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { AuthUser } from "../app/types";
+import api from "../api/axiosinstance";
 
-const REDACTED = "REDACTED";
+interface ProfileProps {
+  user: AuthUser;
+}
 
-const REDACTED_USER = {
-  firstName:  REDACTED,
-  lastName:   REDACTED,
-  username:   REDACTED,
-  email:      REDACTED,
-  role:       REDACTED,
-  employeeId: REDACTED,
-  startDate:  REDACTED,
-};
-
-const MOCK_LOG = [
-  { time: "Today 9:41",  action: "Added vehicle to inventory",  detail: "2023 BMW M3 · VIN WBS8M9C59J" },
-  { time: "Today 8:15",  action: "Closed sale",                 detail: "2022 Audi Q7 · $58,400 · Customer: REDACTED" },
-  { time: "Yesterday",   action: "Updated vehicle details",     detail: "2021 Ford F-150 · Mileage corrected" },
-  { time: "Mon 2:30p",   action: "Submitted appraisal",        detail: "2019 Honda CR-V · Trade-in $19,200" },
-  { time: "Mon 11:00a",  action: "Logged in",                   detail: "Session started" },
-  { time: "Fri 4:45p",   action: "Changed vehicle status",      detail: "2020 Chevy Malibu → On Hold" },
-];
+interface EmployeeProfile {
+  id: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  role: string;
+  hireDate: string;
+  active: boolean;
+}
 
 type TabKey = "edit" | "activity" | "security";
 
@@ -29,19 +26,67 @@ interface PwForm {
   confirm: string;
 }
 
-export default function Profile() {
-  const [tab, setTab]       = useState<TabKey>("edit");
-  const [saved, setSaved]   = useState<boolean>(false);
-  const [pwForm, setPwForm] = useState<PwForm>({ current: "", next: "", confirm: "" });
+const MOCK_LOG = [
+  { time: "Today 9:41",  action: "Added vehicle to inventory",  detail: "2023 BMW M3 · VIN WBS8M9C59J" },
+  { time: "Today 8:15",  action: "Closed sale",                 detail: "2022 Audi Q7 · $58,400" },
+  { time: "Yesterday",   action: "Updated vehicle details",     detail: "2021 Ford F-150 · Mileage corrected" },
+  { time: "Mon 2:30p",   action: "Submitted appraisal",         detail: "2019 Honda CR-V · Trade-in $19,200" },
+  { time: "Mon 11:00a",  action: "Logged in",                   detail: "Session started" },
+  { time: "Fri 4:45p",   action: "Changed vehicle status",      detail: "2020 Chevy Malibu → On Hold" },
+];
 
-  // All profile fields are REDACTED until DB connection is live
-  const user = REDACTED_USER;
+export default function Profile({ user }: ProfileProps) {
+  const [tab, setTab]           = useState<TabKey>("edit");
+  const [saved, setSaved]       = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<string>("");
+  const [profile, setProfile]   = useState<EmployeeProfile | null>(null);
+  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", username: "", email: "" });
+  const [pwForm, setPwForm]     = useState<PwForm>({ current: "", next: "", confirm: "" });
 
-  const handleSave = (e: FormEvent<HTMLFormElement>): void => {
+  useEffect(() => {
+    api.get<EmployeeProfile>(`/api/employees/${user.id}`)
+      .then((res) => {
+        setProfile(res.data);
+        setEditForm({
+          firstName: res.data.firstName ?? "",
+          lastName:  res.data.lastName  ?? "",
+          username:  res.data.username  ?? "",
+          email:     res.data.email     ?? "",
+        });
+      })
+      .catch(() => {
+        // Fall back to auth user data if fetch fails
+        setEditForm({
+          firstName: user.firstName ?? "",
+          lastName:  user.lastName  ?? "",
+          username:  user.username,
+          email:     user.email,
+        });
+      });
+  }, [user]);
+
+  const handleSave = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    // TODO: call employeeApi.updateProfile() when backend is ready
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaveError("");
+    try {
+      const res = await api.put<EmployeeProfile>(`/api/employees/${user.id}`, editForm);
+      setProfile(res.data);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {
+      setSaveError("Failed to save changes.");
+    }
+  };
+
+  const displayUser = profile ?? {
+    firstName:  user.firstName,
+    lastName:   user.lastName ?? "",
+    username:   user.username,
+    email:      user.email,
+    role:       user.role,
+    hireDate:   user.startDate,
+    active:     true,
+    id:         user.id,
   };
 
   return (
@@ -61,10 +106,12 @@ export default function Profile() {
           <div className="profile-sidebar">
             <div className="avatar-section">
               <div className="avatar-ring">
-                <div className="avatar-inner">??</div>
+                <div className="avatar-inner">
+                  {displayUser.firstName?.[0]}{displayUser.lastName?.[0]}
+                </div>
               </div>
-              <div className="profile-name">{user.firstName} {user.lastName}</div>
-              <div className="profile-role-tag">{user.role}</div>
+              <div className="profile-name">{displayUser.firstName} {displayUser.lastName}</div>
+              <div className="profile-role-tag">{displayUser.role}</div>
               <div className="profile-id">ID: {user.employeeId}</div>
             </div>
 
@@ -73,18 +120,14 @@ export default function Profile() {
             <div className="sidebar-section">
               <div className="sidebar-label">Info</div>
               {[
-                { k: "Username",     v: user.username  },
-                { k: "Email",        v: user.email     },
-                { k: "Member Since", v: user.startDate },
-                { k: "Status",       v: "Active"       },
+                { k: "Username",     v: displayUser.username  },
+                { k: "Email",        v: displayUser.email     },
+                { k: "Member Since", v: displayUser.hireDate  },
+                { k: "Status",       v: displayUser.active ? "Active" : "Inactive" },
               ].map((r) => (
                 <div key={r.k} className="info-row">
                   <div className="info-key">{r.k}</div>
-                  <div className="info-val">
-                    {r.v === REDACTED
-                      ? <span className="redacted-tag">REDACTED</span>
-                      : r.v}
-                  </div>
+                  <div className="info-val">{r.v}</div>
                 </div>
               ))}
             </div>
@@ -93,7 +136,6 @@ export default function Profile() {
 
             <div className="sidebar-section">
               <div className="sidebar-label">This Month</div>
-              {/* Replace with real employeeApi.getMonthlyStats() */}
               {[
                 { label: "Vehicles Added", val: "—" },
                 { label: "Sales Closed",   val: "—" },
@@ -124,43 +166,41 @@ export default function Profile() {
             {/* ── Edit tab ── */}
             {tab === "edit" && (
               <form className="edit-form" onSubmit={handleSave}>
-                <div className="redacted-notice">
-                  <strong>Note:</strong> User fields are REDACTED until the MySQL database
-                  connection is live. Connect your Spring Boot{" "}
-                  <code>/api/employees/&#123;id&#125;</code> endpoint and replace
-                  the placeholder values.
-                </div>
-
-                {saved && <div className="success-banner">Profile saved (demo only — no DB yet).</div>}
+                {saved      && <div className="success-banner">Profile saved.</div>}
+                {saveError  && <div className="error-msg">{saveError}</div>}
 
                 <div className="form-row">
                   <div className="field-group">
                     <label className="field-label">First Name</label>
-                    <input className="field-input" defaultValue={REDACTED} />
+                    <input className="field-input" value={editForm.firstName}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, firstName: e.target.value })} />
                   </div>
                   <div className="field-group">
                     <label className="field-label">Last Name</label>
-                    <input className="field-input" defaultValue={REDACTED} />
+                    <input className="field-input" value={editForm.lastName}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, lastName: e.target.value })} />
                   </div>
                   <div className="field-group">
                     <label className="field-label">Username</label>
-                    <input className="field-input" defaultValue={REDACTED} />
+                    <input className="field-input" value={editForm.username}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, username: e.target.value })} />
                   </div>
                   <div className="field-group">
                     <label className="field-label">Role</label>
-                    <input className="field-input" defaultValue={REDACTED} disabled />
+                    <input className="field-input" value={displayUser.role} disabled />
                   </div>
                   <div className="field-group full">
                     <label className="field-label">Email Address</label>
-                    <input className="field-input" type="email" defaultValue={REDACTED} />
+                    <input className="field-input" type="email" value={editForm.email}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, email: e.target.value })} />
                   </div>
                   <div className="field-group">
                     <label className="field-label">Employee ID</label>
-                    <input className="field-input" defaultValue={REDACTED} disabled />
+                    <input className="field-input" value={user.employeeId} disabled />
                   </div>
                   <div className="field-group">
                     <label className="field-label">Start Date</label>
-                    <input className="field-input" defaultValue={REDACTED} disabled />
+                    <input className="field-input" value={displayUser.hireDate} disabled />
                   </div>
                 </div>
 

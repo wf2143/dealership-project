@@ -1,12 +1,11 @@
 "use client";
 
-import { PageKey } from "../app/types";
+import { PageKey, Vehicle } from "../app/types";
 import { useState, useEffect } from "react";
-
+import api from "../api/axiosinstance";
 
 const now = new Date();
 const DAY = now.toLocaleDateString("en-US", { weekday: "long" });
-const DATE = now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
 const MOCK_ACTIVITY = [
   { icon: "🚗", main: "2023 BMW M3 added to inventory", sub: "VIN: WBS8M9C59J5L12345", time: "9:41 AM" },
@@ -31,12 +30,26 @@ interface WelcomeProps {
 }
 
 export default function Welcome({ user = { firstName: "Alex", role: "Sales Associate" }, onNavigate }: WelcomeProps) {
-  const [greeting, setGreeting] = useState("");
+  const [greeting, setGreeting]     = useState("");
+  const [vehicles, setVehicles]     = useState<Vehicle[]>([]);
 
   useEffect(() => {
     const h = new Date().getHours();
     setGreeting(h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : "Good Evening");
   }, []);
+
+  useEffect(() => {
+    api.get<Vehicle[]>("/api/vehicles")
+      .then((res) => setVehicles(res.data))
+      .catch(() => {/* stats stay at 0 if backend unreachable */});
+  }, []);
+
+  const onLot      = vehicles.filter((v) => v.status !== "sold").length;
+  const sold       = vehicles.filter((v) => v.status === "sold").length;
+  const avgDays    = vehicles.length > 0
+    ? Math.round(vehicles.reduce((a, v) => a + v.daysOnLot, 0) / vehicles.length)
+    : 0;
+  const longOnLot  = vehicles.filter((v) => v.daysOnLot > 60).length;
 
   return (
     <>
@@ -50,7 +63,7 @@ export default function Welcome({ user = { firstName: "Alex", role: "Sales Assoc
             <span className="name-highlight">{user.firstName}.</span>
           </div>
           <div className="hero-subtitle">
-            Here's what's happening at Apex Motors today. You're logged in as <strong style={{color:"var(--platinum)"}}>{user.role}</strong>.
+            Here&apos;s what&apos;s happening at Apex Motors today. You&apos;re logged in as <strong style={{color:"var(--platinum)"}}>{user.role}</strong>.
           </div>
           <div className="hero-date">
             <div className="hero-date-day">{now.getDate()}</div>
@@ -61,10 +74,10 @@ export default function Welcome({ user = { firstName: "Alex", role: "Sales Assoc
         {/* Stats */}
         <div className="stats-row">
           {[
-            { label: "Vehicles on Lot", value: "247", delta: "▲ 12 this week", up: true },
-            { label: "Sales This Month", value: "38", delta: "▲ 6 vs last month", up: true, gold: true },
-            { label: "Avg. Days on Lot", value: "31", delta: "▼ 4 days", up: true },
-            { label: "Pending Appraisals", value: "9", delta: "▼ 2 from yesterday", up: false },
+            { label: "Vehicles on Lot",    value: String(onLot),   delta: "live from DB",      up: true  },
+            { label: "Sales This Month",   value: String(sold),    delta: "live from DB",      up: true, gold: true },
+            { label: "Avg. Days on Lot",   value: String(avgDays), delta: "live from DB",      up: true  },
+            { label: "60+ Days on Lot",    value: String(longOnLot), delta: "needs attention", up: longOnLot === 0 },
           ].map((s) => (
             <div key={s.label} className="stat-card">
               <div className="stat-label">{s.label}</div>

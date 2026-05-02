@@ -1,15 +1,6 @@
+"use client";
 import { useState, ChangeEvent, FormEvent } from "react";
-
-export interface PendingSignup {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  role: string;
-  submittedAt: string;
-}
-
-export const PENDING_SIGNUPS: PendingSignup[] = [];
+import api from "../api/axiosinstance";
 
 const ROLES = [
   "Sales Associate",
@@ -42,6 +33,7 @@ export default function Signup({ onNavigateLogin }: SignupProps) {
   const [form, setForm]       = useState<SignupForm>(BLANK);
   const [error, setError]     = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,26 +48,29 @@ export default function Signup({ onNavigateLogin }: SignupProps) {
     return null;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     const err = validate();
     if (err) { setError(err); return; }
 
-    const entry: PendingSignup = {
-      firstName:   form.firstName,
-      lastName:    form.lastName,
-      username:    form.username,
-      email:       form.email,
-      role:        form.role,
-      submittedAt: new Date().toISOString(),
-    };
-    PENDING_SIGNUPS.push(entry);
-
-    setSuccess(
-      `Request received for ${form.firstName} ${form.lastName}. ` +
-      "A manager will add your account — no backend connected yet."
-    );
-    setForm(BLANK);
+    setLoading(true);
+    try {
+      await api.post("/api/employees/register", {
+        firstName: form.firstName,
+        lastName:  form.lastName,
+        username:  form.username,
+        email:     form.email,
+        password:  form.password,
+        role:      form.role,
+        active:    true,
+      });
+      setSuccess(`Account created for ${form.firstName} ${form.lastName}. You can now log in.`);
+      setForm(BLANK);
+    } catch {
+      setError("Failed to create account. Username may already be taken.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -91,11 +86,6 @@ export default function Signup({ onNavigateLogin }: SignupProps) {
 
           <div className="signup-title">Create Account</div>
           <div className="signup-subtitle">Register your dealership employee profile</div>
-
-          <div className="notice-banner">
-            <strong>Note:</strong> This form collects your info but does not create a live
-            account yet. A manager will manually add your credentials once reviewed.
-          </div>
 
           {error   && <div className="error-msg">{error}</div>}
           {success && <div className="success-msg">{success}</div>}
@@ -152,8 +142,8 @@ export default function Signup({ onNavigateLogin }: SignupProps) {
               </div>
             </div>
 
-            <button className="btn-signup" type="submit">
-              Submit Request
+            <button className="btn-signup" type="submit" disabled={loading}>
+              {loading ? "Creating account..." : "Submit Request"}
             </button>
           </form>
 

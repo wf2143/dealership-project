@@ -46,6 +46,11 @@ public class UserService {
         return repo.save(u);
     }
 
+    public Optional<User> login(String username, String password) {
+        return repo.findByUsername(username)
+                .filter(user -> password.equals(user.getPassword())); // Simple password check
+    }
+
     // ── UPDATE ────────────────────────────────────────────────
 
     @Transactional

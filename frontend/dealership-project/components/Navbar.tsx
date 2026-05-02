@@ -1,10 +1,11 @@
+"use client";
 import { useState } from "react";
 import { AuthUser, PageKey } from "../app/types";
 
 const NAV_ITEMS: { key: PageKey; label: string }[] = [
-  { key: "welcome",   label: "Dashboard" },
+  { key: "welcome",   label: "Dashboard"  },
   { key: "lot",       label: "On the Lot" },
-  { key: "inventory", label: "Inventory" },
+  { key: "inventory", label: "Inventory"  },
   { key: "profile",   label: "My Profile" },
 ];
 
@@ -28,9 +29,9 @@ export default function Navbar({ user, activePage, onNavigate, onLogout }: Navba
   return (
     <>
       <nav className="navbar">
+        {/* Text-only logo — matches the Login page treatment */}
         <div className="nav-logo" onClick={() => go("welcome")}>
-          <div className="nav-logo-hex" />
-          <span className="nav-logo-text">Apex Motors</span>
+          <span className="nav-logo-text">Mario&apos;s Auto Sales</span>
         </div>
 
         <div className="nav-links">

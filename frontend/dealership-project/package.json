@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "conc": "concurrently \"cd ../backend && mvn spring-boot:run\" \"npm run dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

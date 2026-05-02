@@ -1,5 +1,7 @@
-import { useState, ChangeEvent } from "react";
+"use client";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Vehicle, VehicleStatus } from "../app/types";
+import api from "../api/axiosinstance";
 
 const styles = `
 /* Add your CSS styles here */
@@ -10,19 +12,6 @@ interface TableVehicle extends Vehicle {
   image: string;
 }
 
-const INITIAL_INVENTORY: TableVehicle[] = [
-  { id:1,  vin:"WBS8M9C59J5L12345", year:2024, make:"BMW",          model:"M3 Competition", trim:"Competition xDrive", color:"Brooklyn Grey",   mileage:1200,  price:82900,  status:"available", lot:"Lot A · Row 2",     daysOnLot:8,  image:"/cars/placeholder.png" },
-  { id:2,  vin:"4JGDF6EE0NA123456", year:2023, make:"Mercedes-Benz",model:"GLE 53 AMG",     trim:"4MATIC+",            color:"Obsidian Black",  mileage:8450,  price:79500,  status:"hold",      lot:"Showroom",           daysOnLot:23, image:"/cars/placeholder.png" },
-  { id:3,  vin:"WP1AE2A20NDA01234", year:2022, make:"Porsche",       model:"Cayenne GTS",    trim:"GTS Coupe",          color:"Carmine Red",     mileage:14200, price:91200,  status:"available", lot:"Lot B · Row 1",     daysOnLot:41, image:"/cars/placeholder.png" },
-  { id:4,  vin:"WAUZZZF20RN012345", year:2024, make:"Audi",          model:"RS6 Avant",      trim:"Performance",        color:"Nardo Grey",      mileage:3100,  price:115000, status:"available", lot:"Showroom",           daysOnLot:5,  image:"/cars/placeholder.png" },
-  { id:5,  vin:"1G1YB2D47N5100001", year:2023, make:"Chevrolet",     model:"Corvette Z06",   trim:"3LZ",                color:"Rapid Blue",      mileage:6700,  price:104500, status:"sold",      lot:"Lot A · Row 7",     daysOnLot:62, image:"/cars/placeholder.png" },
-  { id:6,  vin:"1FTFW1RG3NFA12345", year:2021, make:"Ford",          model:"F-150 Raptor",   trim:"802A",               color:"Iconic Silver",   mileage:28900, price:58700,  status:"available", lot:"Truck Lot · Row 3", daysOnLot:17, image:"/cars/placeholder.png" },
-  { id:7,  vin:"JTHH5BEL5NA001234", year:2022, make:"Lexus",         model:"LC 500h",        trim:"Inspiration",        color:"Atomic Silver",   mileage:19000, price:72000,  status:"available", lot:"Lot A · Row 4",     daysOnLot:33, image:"/cars/placeholder.png" },
-  { id:8,  vin:"SALWS2RU1NA123456", year:2023, make:"Range Rover",   model:"Sport SVR",      trim:"Carbon Edition",     color:"Carpathian Grey", mileage:11300, price:138000, status:"hold",      lot:"Showroom",           daysOnLot:12, image:"/cars/placeholder.png" },
-  { id:9,  vin:"2T1BURHE1NC123456", year:2024, make:"Toyota",        model:"GR Corolla",     trim:"Morizo Edition",     color:"Heavy Metal",     mileage:500,   price:62000,  status:"incoming",  lot:"In Transit",         daysOnLot:0,  image:"/cars/placeholder.png" },
-  { id:10, vin:"19XFC1F3XNE123456", year:2022, make:"Honda",         model:"Civic Type R",   trim:"FL5",                color:"Rallye Red",      mileage:9800,  price:44900,  status:"available", lot:"Lot B · Row 4",     daysOnLot:27, image:"/cars/placeholder.png" },
-];
-
 const STATUS_LABELS: Record<VehicleStatus, string> = {
   available: "Available", hold: "On Hold", sold: "Sold", incoming: "Incoming",
 };
@@ -32,8 +21,6 @@ const STATUS_CLASS: Record<VehicleStatus, string> = {
 
 const fmt = (n: number): string => `$${n.toLocaleString()}`;
 
-const MAKES = [...new Set(INITIAL_INVENTORY.map((v) => v.make))];
-
 const BLANK: Omit<TableVehicle, "id" | "daysOnLot"> = {
   vin:"", year: new Date().getFullYear(), make:"", model:"", trim:"", color:"",
   mileage:0, price:0, status:"available", lot:"", image:"/cars/placeholder.png",
@@ -41,12 +28,31 @@ const BLANK: Omit<TableVehicle, "id" | "daysOnLot"> = {
 
 type SortKey = keyof Pick<TableVehicle, "year" | "make" | "model" | "mileage" | "price" | "daysOnLot" | "status">;
 
+interface ThProps {
+  col: SortKey;
+  label: string;
+  sortKey: SortKey;
+  sortDir: 1 | -1;
+  onSort: (key: SortKey) => void;
+}
+
+const Th = ({ col, label, sortKey, sortDir, onSort }: ThProps) => (
+  <th
+    onClick={() => onSort(col)}
+    style={{ color: sortKey === col ? "var(--gold)" : undefined, opacity: sortKey === col ? 1 : undefined }}
+  >
+    {label}{sortKey === col ? (sortDir === 1 ? " ↑" : " ↓") : ""}
+  </th>
+);
+
 interface InventoryProps {
   userRole: string;
 }
 
 export default function Inventory({ userRole }: InventoryProps) {
-  const [inventory, setInventory] = useState<TableVehicle[]>(INITIAL_INVENTORY);
+  const [inventory, setInventory] = useState<TableVehicle[]>([]);
+  const [loading, setLoading]     = useState<boolean>(true);
+  const [error, setError]         = useState<string>("");
   const [search, setSearch]       = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [makeFilter, setMakeFilter]     = useState<string>("all");
@@ -56,6 +62,21 @@ export default function Inventory({ userRole }: InventoryProps) {
   const [sortDir, setSortDir]     = useState<1 | -1>(1);
 
   const isManager = ["General Manager", "Lot Manager", "Finance Manager"].includes(userRole);
+
+  useEffect(() => {
+    api.get<Vehicle[]>("/api/vehicles")
+      .then((res) => {
+        const withImage: TableVehicle[] = res.data.map((v) => ({
+          ...v,
+          image: "/cars/placeholder.png",
+        }));
+        setInventory(withImage);
+      })
+      .catch(() => setError("Failed to load inventory."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const MAKES = [...new Set(inventory.map((v) => v.make))];
 
   const handleSort = (key: SortKey): void => {
     if (sortKey === key) setSortDir((d) => (d === 1 ? -1 : 1));
@@ -76,57 +97,68 @@ export default function Inventory({ userRole }: InventoryProps) {
       return String(av).localeCompare(String(bv)) * sortDir;
     });
 
-  const openAdd  = (): void => { setForm(BLANK);               setModal("add"); };
-  const openEdit = (v: TableVehicle): void => { setForm({ ...v }); setModal(v);   };
+  const openAdd  = (): void => { setForm(BLANK); setModal("add"); };
+  const openEdit = (v: TableVehicle): void => { setForm({ ...v }); setModal(v); };
   const closeModal = (): void => setModal(null);
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (modal === "add") {
-      const newV: TableVehicle = {
+      const payload = {
         ...form,
-        id: Date.now(),
         year: Number(form.year),
         mileage: Number(form.mileage),
         price: Number(form.price),
         daysOnLot: 0,
       };
-      setInventory([newV, ...inventory]);
-    } else if (modal && typeof modal === 'object') {
-      setInventory(inventory.map((v) =>
-        v.id === modal.id
-          ? { ...v, ...form, year: Number(form.year), mileage: Number(form.mileage), price: Number(form.price) }
-          : v
-      ));
+      try {
+        const res = await api.post<Vehicle>("/api/vehicles", payload);
+        setInventory([{ ...res.data, image: "/cars/placeholder.png" }, ...inventory]);
+      } catch {
+        setError("Failed to add vehicle.");
+      }
+    } else if (modal && typeof modal === "object") {
+      const payload = {
+        ...form,
+        year: Number(form.year),
+        mileage: Number(form.mileage),
+        price: Number(form.price),
+        daysOnLot: modal.daysOnLot,
+      };
+      try {
+        const res = await api.put<Vehicle>(`/api/vehicles/${modal.id}`, payload);
+        setInventory(inventory.map((v) =>
+          v.id === modal.id ? { ...res.data, image: v.image } : v
+        ));
+      } catch {
+        setError("Failed to update vehicle.");
+      }
     }
     closeModal();
   };
 
-  const handleDelete = (id: number): void => {
-    if (window.confirm("Remove this vehicle from inventory?")) {
+  const handleDelete = async (id: number): Promise<void> => {
+    if (!window.confirm("Remove this vehicle from inventory?")) return;
+    try {
+      await api.delete(`/api/vehicles/${id}`);
       setInventory(inventory.filter((v) => v.id !== id));
+    } catch {
+      setError("Failed to delete vehicle.");
     }
   };
 
   const total      = inventory.length;
   const available  = inventory.filter((v) => v.status === "available").length;
   const sold       = inventory.filter((v) => v.status === "sold").length;
-  const avgDays    = Math.round(inventory.reduce((a, v) => a + v.daysOnLot, 0) / total);
+  const avgDays    = total > 0 ? Math.round(inventory.reduce((a, v) => a + v.daysOnLot, 0) / total) : 0;
   const totalValue = inventory.filter((v) => v.status !== "sold").reduce((a, v) => a + v.price, 0);
 
-  const Th = ({ col, label }: { col: SortKey; label: string }) => (
-    <th
-      onClick={() => handleSort(col)}
-      style={{ color: sortKey === col ? "var(--gold)" : undefined, opacity: sortKey === col ? 1 : undefined }}
-    >
-      {label}{sortKey === col ? (sortDir === 1 ? " ↑" : " ↓") : ""}
-    </th>
-  );
+  const currentVehicle = modal && typeof modal === "object" ? modal : null;
 
-  const currentVehicle = modal && typeof modal === 'object' ? modal : null;
+  if (loading) return <div className="inv-root" style={{padding:"40px",textAlign:"center"}}>Loading inventory…</div>;
 
   return (
     <>
@@ -140,6 +172,7 @@ export default function Inventory({ userRole }: InventoryProps) {
             <div className="page-title">Full Inventory</div>
           </div>
           <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+            {error && <span style={{color:"#e74c3c",fontSize:"13px",alignSelf:"center"}}>{error}</span>}
             <button className="btn-outline">Export CSV</button>
             <button className="btn-outline">Print Report</button>
             {isManager && <button className="btn-primary" onClick={openAdd}>+ Add Vehicle</button>}
@@ -149,11 +182,11 @@ export default function Inventory({ userRole }: InventoryProps) {
         {/* KPIs */}
         <div className="kpi-strip">
           {[
-            { label:"Total Units",    value: total,                                               cls:""      },
-            { label:"Available",      value: available,                                           cls:"green"  },
-            { label:"Sold",           value: sold,                                                cls:""      },
-            { label:"Avg Days on Lot",value: avgDays,                                            cls: avgDays > 45 ? "red" : "" },
-            { label:"Lot Value",      value:`$${(totalValue/1_000_000).toFixed(2)}M`,            cls:"gold"  },
+            { label:"Total Units",    value: total,                                    cls:""      },
+            { label:"Available",      value: available,                                cls:"green"  },
+            { label:"Sold",           value: sold,                                     cls:""      },
+            { label:"Avg Days on Lot",value: avgDays,                                  cls: avgDays > 45 ? "red" : "" },
+            { label:"Lot Value",      value:`$${(totalValue/1_000_000).toFixed(2)}M`,  cls:"gold"  },
           ].map((k) => (
             <div key={k.label} className="kpi-cell">
               <div className="kpi-label">{k.label}</div>
@@ -216,14 +249,14 @@ export default function Inventory({ userRole }: InventoryProps) {
               <thead>
                 <tr>
                   <th style={{width:68}}>Photo</th>
-                  <Th col="year"      label="Year" />
-                  <Th col="make"      label="Make / Model" />
+                  <Th col="year"      label="Year"          sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <Th col="make"      label="Make / Model"  sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th>VIN</th>
-                  <Th col="mileage"   label="Mileage" />
-                  <Th col="price"     label="Price" />
-                  <Th col="status"    label="Status" />
+                  <Th col="mileage"   label="Mileage"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <Th col="price"     label="Price"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <Th col="status"    label="Status"        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th>Location</th>
-                  <Th col="daysOnLot" label="Days" />
+                  <Th col="daysOnLot" label="Days"          sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th></th>
                 </tr>
               </thead>
@@ -231,10 +264,6 @@ export default function Inventory({ userRole }: InventoryProps) {
                 {filtered.map((v) => (
                   <tr key={v.id} onClick={() => openEdit(v)}>
                     <td onClick={(e) => e.stopPropagation()}>
-                      {/*
-                        Replace v.image with your real PNG path.
-                        Falls back to placeholder icon if file is missing.
-                      */}
                       <img
                         className="td-thumb"
                         src={v.image}
@@ -279,10 +308,6 @@ export default function Inventory({ userRole }: InventoryProps) {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
 
-            {/*
-              Modal image: shows vehicle PNG at full width.
-              Replace the src with a real path when PNGs are added.
-            */}
             {currentVehicle ? (
               <>
                 <img

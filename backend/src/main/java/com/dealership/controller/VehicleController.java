@@ -2,6 +2,7 @@ package com.dealership.controller;
 
 import com.dealership.model.Vehicle;
 import com.dealership.service.VehicleService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -23,5 +24,25 @@ public class VehicleController {
     @PostMapping
     public Vehicle create(@RequestBody Vehicle v) {
         return service.save(v);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Vehicle> getById(@PathVariable Long id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicle> update(@PathVariable Long id, @RequestBody Vehicle v) {
+        return service.update(id, v)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

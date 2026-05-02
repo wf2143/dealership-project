@@ -55,6 +55,24 @@ public class EmployeeService {
         return repo.save(e);
     }
 
+    public Optional<Employee> login(String username, String password) {
+        // Authentication is currently based on email/username lookup only.
+        return repo.findByEmail(username);
+    }
+
+    public Optional<Employee> findById(Long id) {
+        return getById(id);
+    }
+
+    @Transactional
+    public Optional<Employee> update(Long id, Employee employee) {
+        return repo.findById(id)
+                .map(existing -> {
+                    employee.setId(id);
+                    return repo.save(employee);
+                });
+    }
+
     // ── UPDATE ────────────────────────────────────────────────
 
     @Transactional

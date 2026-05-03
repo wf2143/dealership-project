@@ -2,7 +2,6 @@
 
 import { useState, ReactElement } from "react";
 import Login from '../components/Login';
-import Signup from '../components/Signup';
 import Navbar from '../components/Navbar';
 import Welcome from '../components/Welcome';
 import CurrentLot from '../components/Lot';
@@ -25,9 +24,6 @@ export default function App(): ReactElement {
   };
 
   if (!user) {
-    if (page === "signup") {
-      return <Signup onNavigateLogin={() => setPage("login")} />;
-    }
     return (
       <Login
         onLogin={handleLogin}

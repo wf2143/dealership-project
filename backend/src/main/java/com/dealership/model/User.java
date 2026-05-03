@@ -3,7 +3,7 @@ package com.dealership.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "app_user",        // "user" is a reserved word in MySQL
+@Table(name = "app_user",
        uniqueConstraints = {
            @UniqueConstraint(columnNames = "username"),
            @UniqueConstraint(columnNames = "email")
@@ -24,10 +24,12 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
     @Column(name = "email", unique = true)
     private String email;
 
-    // e.g. 'General Manager', 'Sales Associate', 'Lot Manager'
     @Column(name = "role")
     private String role;
 
@@ -36,8 +38,6 @@ public class User {
 
     @Column(name = "start_date")
     private String startDate;
-
-    // ── Getters & Setters ─────────────────────────────────────
 
     public Long getId()                         { return id; }
     public void setId(Long id)                  { this.id = id; }
@@ -50,7 +50,8 @@ public class User {
 
     public String getUsername()                 { return username; }
     public void setUsername(String username)    { this.username = username; }
-
+    public String getPassword()                 { return password; }
+    public void setPassword(String password)     { this.password = password; }
     public String getEmail()                    { return email; }
     public void setEmail(String email)          { this.email = email; }
 

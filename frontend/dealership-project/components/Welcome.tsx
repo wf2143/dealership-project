@@ -48,47 +48,20 @@ export default function Welcome({
   return (
     <div className="welcome-root">
 
-      {/* Hero — greeting + date */}
       <div className="hero">
-        <div className="hero-glow" />
-        <div className="hero-eyebrow">{greeting}</div>
         <div className="hero-title">
           Welcome Back,<br />
           <span className="name-highlight">
             {user.firstName || "Employee"}.
           </span>
         </div>
-        <div className="hero-subtitle">
-          Here&apos;s what&apos;s happening at Mario&apos;s Auto Sales today.
-          You&apos;re logged in as{" "}
-          <strong style={{ color: "var(--platinum)" }}>
-            {user.role || "Staff"}
-          </strong>.
-        </div>
-        <div className="hero-date">
-          <div className="hero-date-day">{now.getDate()}</div>
-          <div className="hero-date-label">
-            {DAY.toUpperCase()} ·{" "}
-            {now
-              .toLocaleDateString("en-US", { month: "short", year: "numeric" })
-              .toUpperCase()}
-          </div>
-        </div>
       </div>
 
-      {/* Main two-column layout — activity + quick actions */}
       <div className="content-area">
 
-        {/* Left — recent activity from DB */}
         <div className="main-col">
           <div className="section-header">
             <div className="section-title">Recent Activity</div>
-            <span
-              className="section-link"
-              onClick={() => onNavigate?.("inventory")}
-            >
-              View Inventory →
-            </span>
           </div>
 
           {activityError && (
@@ -104,16 +77,10 @@ export default function Welcome({
           <div className="activity-list">
             {activity.map((a) => (
               <div key={a.id} className="activity-item">
-                <div className="activity-icon">{a.icon || "📋"}</div>
+                <div className="activity-icon">{a.icon || ""}</div>
                 <div className="activity-text">
                   <div className="activity-main">{a.description}</div>
                   <div className="activity-sub">{a.detail}</div>
-                </div>
-                <div className="activity-time">
-                  {new Date(a.createdAt).toLocaleTimeString("en-US", {
-                    hour:   "numeric",
-                    minute: "2-digit",
-                  })}
                 </div>
               </div>
             ))}
@@ -127,10 +94,10 @@ export default function Welcome({
           </div>
           <div className="quick-actions">
             {[
-              { icon: "➕", label: "Add Vehicle",  sub: "List new unit",  nav: "inventory" as PageKey },
-              { icon: "🔍", label: "Search Lot",   sub: "Find by VIN",    nav: "lot"       as PageKey },
-              { icon: "📋", label: "Inventory",    sub: "Full list",      nav: "inventory" as PageKey },
-              { icon: "👤", label: "My Profile",   sub: "Edit account",   nav: "profile"   as PageKey },
+              { icon: "", label: "Add Vehicle",  sub: "",  nav: "inventory" as PageKey },
+              { icon: "", label: "Search Lot",   sub: "",    nav: "lot"       as PageKey },
+              { icon: "", label: "Inventory",    sub: "",      nav: "inventory" as PageKey },
+              { icon: "", label: "My Profile",   sub: "",   nav: "profile"   as PageKey },
             ].map((a) => (
               <button
                 key={a.label}

@@ -50,10 +50,6 @@ export default function Navbar({ user, activePage, onNavigate, onLogout }: Navba
           <div className="nav-user" onClick={() => go("profile")}>
             <div className="nav-avatar">{initials}</div>
             <div className="nav-user-info">
-              <span className="nav-user-name">
-                {user.firstName} {user.lastName}
-              </span>
-              <span className="nav-user-role">{user.role}</span>
             </div>
           </div>
 

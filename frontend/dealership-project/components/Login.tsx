@@ -69,16 +69,13 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
     <div className="login-root">
       <div className="login-bg-art" />
 
-      {/* Left — dealership name only, no logo, no motto */}
       <div className="login-left">
         <div className="login-dealer-name">Mario&apos;s<br />Auto Sales</div>
-        <div className="divider-line" />
       </div>
 
       {/* Right — form panel */}
       <div className="login-right">
         <div className="form-title">Employee Login</div>
-        <div className="form-subtitle">Access your dealership portal</div>
 
         {error && <div className="error-msg">{error}</div>}
 
@@ -89,7 +86,6 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
               className="field-input"
               name="username"
               type="text"
-              placeholder="your.username"
               value={form.username}
               onChange={handleChange}
               autoComplete="username"
@@ -102,7 +98,6 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
               className="field-input"
               name="password"
               type="password"
-              placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
               autoComplete="current-password"
@@ -113,13 +108,6 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
-        <div className="signup-prompt">
-          New employee?{" "}
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigateSignup(); }}>
-            Request access
-          </a>
-        </div>
       </div>
     </div>
   );

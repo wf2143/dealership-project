@@ -18,7 +18,6 @@ interface EmployeeProfile {
   active: boolean;
 }
 
-// Only two tabs — no activity log
 type TabKey = "edit" | "security";
 
 interface PwForm {
@@ -44,7 +43,6 @@ export default function Profile({ user }: ProfileProps) {
   const [pwError, setPwError]     = useState<string>("");
   const [pwSaved, setPwSaved]     = useState<boolean>(false);
 
-  // Load employee profile from DB
   useEffect(() => {
     api.get<EmployeeProfile>(`/api/employees/${user.id}`)
       .then((res) => {
@@ -57,7 +55,6 @@ export default function Profile({ user }: ProfileProps) {
         });
       })
       .catch(() => {
-        // Fall back to auth session data
         setEditForm({
           firstName: user.firstName ?? "",
           lastName:  user.lastName  ?? "",
@@ -98,7 +95,6 @@ export default function Profile({ user }: ProfileProps) {
     }
   };
 
-  // Change password
   const handlePasswordChange = async (
     e: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -129,7 +125,6 @@ export default function Profile({ user }: ProfileProps) {
     }
   };
 
-  // Deactivate account — calls DELETE on backend
   const handleDeactivate = async (): Promise<void> => {
     if (
       !window.confirm(
@@ -140,7 +135,6 @@ export default function Profile({ user }: ProfileProps) {
       return;
     try {
       await api.delete(`/api/employees/${user.id}`);
-      // Redirect to login handled by parent via auth state
       window.location.reload();
     } catch {
       setSaveError("Could not deactivate account.");
@@ -149,11 +143,7 @@ export default function Profile({ user }: ProfileProps) {
 
   return (
     <div className="profile-root">
-      {/* No cover banner / yellow bar */}
-
       <div className="profile-layout">
-
-        {/* Sidebar — avatar, name, role, basic info only */}
         <div className="profile-sidebar">
           <div className="avatar-section">
             <div className="avatar-ring">
@@ -163,31 +153,9 @@ export default function Profile({ user }: ProfileProps) {
               {displayUser.firstName} {displayUser.lastName}
             </div>
             <div className="profile-role-tag">{displayUser.role}</div>
-            <div className="profile-id">ID: {user.employeeId}</div>
-          </div>
-
-          <div className="sidebar-divider" />
-
-          <div className="sidebar-section">
-            <div className="sidebar-label">Info</div>
-            {[
-              { k: "Username",     v: displayUser.username },
-              { k: "Email",        v: displayUser.email    },
-              { k: "Member Since", v: displayUser.hireDate },
-              {
-                k: "Status",
-                v: displayUser.active ? "Active" : "Inactive",
-              },
-            ].map((r) => (
-              <div key={r.k} className="info-row">
-                <div className="info-key">{r.k}</div>
-                <div className="info-val">{r.v}</div>
-              </div>
-            ))}
           </div>
         </div>
 
-        {/* Main content — Edit Profile + Security only */}
         <div className="profile-main">
           <div className="tab-bar">
             {(["edit", "security"] as TabKey[]).map((t) => (
@@ -201,7 +169,6 @@ export default function Profile({ user }: ProfileProps) {
             ))}
           </div>
 
-          {/* ── Edit Profile tab ── */}
           {tab === "edit" && (
             <form className="edit-form" onSubmit={handleSave}>
               {saved     && <div className="success-banner">Profile saved.</div>}
@@ -297,7 +264,6 @@ export default function Profile({ user }: ProfileProps) {
             </form>
           )}
 
-          {/* ── Security tab ── */}
           {tab === "security" && (
             <div>
               <form className="security-block" onSubmit={handlePasswordChange}>
@@ -332,13 +298,8 @@ export default function Profile({ user }: ProfileProps) {
                 </button>
               </form>
 
-              {/* Deactivate — calls DELETE /api/employees/:id */}
               <div className="danger-zone">
                 <div className="danger-title">Danger Zone</div>
-                <div className="danger-text">
-                  Deactivating your account will remove access immediately.
-                  Contact a manager to restore it.
-                </div>
                 <button className="btn-danger" onClick={handleDeactivate}>
                   Deactivate Account
                 </button>

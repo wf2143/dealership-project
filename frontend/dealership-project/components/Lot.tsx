@@ -66,9 +66,6 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
       <div className="lot-header">
         <div>
           <div className="page-title">Current Lot</div>
-          <div className="page-subtitle">
-            Live inventory · Mario&apos;s Auto Sales
-          </div>
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           {error && (
@@ -83,10 +80,9 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
       {/* Filters */}
       <div className="filters-bar">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
           <input
             className="search-input"
-            placeholder="Search make, model, color, lot…"
+            placeholder="Search make, model, color..."
             value={search}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setSearch(e.target.value)
@@ -128,7 +124,6 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
       <div className="lot-grid">
         {filtered.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🔍</div>
             <div className="empty-state-text">No vehicles match your search</div>
           </div>
         ) : (
@@ -148,7 +143,6 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
                   }}
                 />
                 <div className="card-img-placeholder" style={{ display: "none" }}>
-                  <div className="placeholder-icon">🚗</div>
                   <div className="placeholder-label">Image coming soon</div>
                 </div>
 

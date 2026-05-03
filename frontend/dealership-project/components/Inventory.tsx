@@ -186,10 +186,8 @@ export default function Inventory({ userRole }: InventoryProps) {
     <>
       <div className="inv-root">
 
-        {/* Top bar — no Print / Export buttons */}
         <div className="inv-topbar">
           <div>
-            <div className="page-eyebrow">Mario&apos;s Auto Sales</div>
             <div className="page-title">Full Inventory</div>
           </div>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -203,8 +201,6 @@ export default function Inventory({ userRole }: InventoryProps) {
             )}
           </div>
         </div>
-
-        {/* No KPI strip */}
 
         <div className="inv-content">
 
@@ -258,10 +254,9 @@ export default function Inventory({ userRole }: InventoryProps) {
           <div className="table-area">
             <div className="table-toolbar">
               <div className="search-box">
-                <span className="search-icon">🔍</span>
                 <input
                   className="search-input"
-                  placeholder="Search VIN, make, model, lot…"
+                  placeholder="Search make, model..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -298,12 +293,6 @@ export default function Inventory({ userRole }: InventoryProps) {
                           if (next) next.style.display = "flex";
                         }}
                       />
-                      <div
-                        className="td-thumb-placeholder"
-                        style={{ display: "none" }}
-                      >
-                        🚗
-                      </div>
                     </td>
                     <td className="td-main">{v.year}</td>
                     <td>
@@ -340,7 +329,7 @@ export default function Inventory({ userRole }: InventoryProps) {
                           onClick={() => openEdit(v)}
                           title="Edit"
                         >
-                          ✏️
+                          E
                         </button>
                         {isManager && (
                           <button
@@ -348,7 +337,7 @@ export default function Inventory({ userRole }: InventoryProps) {
                             onClick={() => handleDelete(v.id)}
                             title="Delete"
                           >
-                            🗑️
+                            D
                           </button>
                         )}
                       </div>
@@ -361,12 +350,10 @@ export default function Inventory({ userRole }: InventoryProps) {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
       {modal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
 
-            {/* Vehicle image preview */}
             {currentVehicle ? (
               <>
                 <img
@@ -383,13 +370,11 @@ export default function Inventory({ userRole }: InventoryProps) {
                   className="modal-image-placeholder"
                   style={{ display: "none" }}
                 >
-                  <div className="modal-ph-icon">🚗</div>
-                  <div className="modal-ph-label">Image coming soon</div>
                 </div>
               </>
             ) : (
               <div className="modal-image-placeholder">
-                <div className="modal-ph-icon">🚗</div>
+                <div className="modal-ph-icon"></div>
                 <div className="modal-ph-label">New vehicle — add PNG later</div>
               </div>
             )}

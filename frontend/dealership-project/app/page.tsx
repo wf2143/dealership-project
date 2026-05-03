@@ -7,13 +7,13 @@ import Welcome from '../components/Welcome';
 import CurrentLot from '../components/Lot';
 import Inventory from '../components/Inventory';
 import Profile from '../components/myProfile';
-import { AuthUser, PageKey } from "./types";
+import { AuthEmployee, PageKey } from "./types";
 
 export default function App(): ReactElement {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthEmployee | null>(null);
   const [page, setPage] = useState<PageKey>("login");
 
-  const handleLogin = (userData: AuthUser): void => {
+  const handleLogin = (userData: AuthEmployee): void => {
     setUser(userData);
     setPage("welcome");
   };

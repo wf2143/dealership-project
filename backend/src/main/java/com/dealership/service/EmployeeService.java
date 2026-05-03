@@ -5,7 +5,6 @@ import com.dealership.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,24 +27,16 @@ public class EmployeeService {
         return repo.findById(id);
     }
 
-    public List<Employee> getActive() {
-        return repo.findActiveEmployees();
+    public Optional<Employee> getByUsername(String username) {
+        return repo.findByUsername(username);
     }
 
     public Optional<Employee> getByEmail(String email) {
         return repo.findByEmail(email);
     }
 
-    public List<Employee> getHiredBetween(LocalDate from, LocalDate to) {
-        return repo.findHiredBetween(from, to);
-    }
-
-    public List<Employee> getBySalaryAbove(double min) {
-        return repo.findBySalaryGreaterThan(min);
-    }
-
-    public Double getAverageActiveSalary() {
-        return repo.averageActiveSalary();
+    public List<Employee> getByRole(String role) {
+        return repo.findByRole(role);
     }
 
     // ── CREATE ────────────────────────────────────────────────
@@ -56,42 +47,29 @@ public class EmployeeService {
     }
 
     public Optional<Employee> login(String username, String password) {
-        // Authentication is currently based on email/username lookup only.
-        return repo.findByEmail(username);
-    }
-
-    public Optional<Employee> findById(Long id) {
-        return getById(id);
-    }
-
-    @Transactional
-    public Optional<Employee> update(Long id, Employee employee) {
-        return repo.findById(id)
-                .map(existing -> {
-                    employee.setId(id);
-                    return repo.save(employee);
-                });
+        return repo.findByUsername(username)
+                .filter(emp -> password.equals(emp.getPassword()));
     }
 
     // ── UPDATE ────────────────────────────────────────────────
 
     @Transactional
-    public void updateSalary(Long id, double salary) {
-        repo.updateSalary(id, salary);
+    public void updateRole(Long id, String role) {
+        repo.updateRole(id, role);
     }
 
     @Transactional
-    public void updateContact(Long id, String phone, String email) {
-        repo.updateContact(id, phone, email);
+    public Optional<Employee> updateProfile(Long id, String firstName, String lastName, String username, String email) {
+        repo.updateProfile(id, firstName, lastName, username, email);
+        return repo.findById(id);
     }
 
-    /**
-     * Soft-deletes an employee: sets active = FALSE and records end_date.
-     * Transaction history and employee record are preserved.
-     */
     @Transactional
-    public void deactivate(Long id) {
-        repo.deactivateEmployee(id, LocalDate.now());
+    public boolean updatePassword(Long id, String currentPassword, String newPassword) {
+        Optional<Employee> opt = repo.findById(id);
+        if (opt.isEmpty() || !currentPassword.equals(opt.get().getPassword())) return false;
+        repo.updatePassword(id, newPassword);
+        return true;
     }
 
     // ── DELETE ────────────────────────────────────────────────

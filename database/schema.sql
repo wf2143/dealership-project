@@ -10,24 +10,6 @@ CREATE DATABASE IF NOT EXISTS dealership_db
 USE dealership_db;
 
 -- -------------------------------------------------------------
---  EMPLOYEE
--- -------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS employee (
-    id         BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(100),
-    last_name  VARCHAR(100),
-    username   VARCHAR(100) UNIQUE,
-    password   VARCHAR(255),
-    role       VARCHAR(100),
-    email      VARCHAR(255),
-    phone      VARCHAR(20),
-    hire_date  DATE,
-    end_date   DATE,
-    salary     DOUBLE,
-    active     TINYINT(1)   DEFAULT 1
-);
-
--- -------------------------------------------------------------
 --  VEHICLE
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS vehicle (
@@ -74,18 +56,6 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 -- =============================================================
 --  SEED DATA  (INSERT IGNORE keeps re-runs idempotent)
 -- =============================================================
-
--- -------------------------------------------------------------
---  Employees  –  password for all demo accounts: demo123
--- -------------------------------------------------------------
-INSERT IGNORE INTO employee
-    (id, first_name, last_name, username, password, role,               email,                        phone,          hire_date,   salary, active)
-VALUES
-    (1,  'Gary',     'Mitchell','gmanager','demo123','General Manager',  'g.mitchell@dealership.com',  '555-100-0001', '2019-03-15', 95000, 1),
-    (2,  'James',    'Smith',   'jsmith',  'demo123','Sales Associate',  'j.smith@dealership.com',     '555-100-0002', '2021-06-01', 52000, 1),
-    (3,  'Maria',    'Wilson',  'mwilson', 'demo123','Finance Manager',  'm.wilson@dealership.com',    '555-100-0003', '2020-01-10', 78000, 1),
-    (4,  'Tom',      'Larson',  'tlot',    'demo123','Lot Manager',      't.larson@dealership.com',    '555-100-0004', '2018-09-20', 60000, 1),
-    (5,  'Sara',     'Chen',    'stech',   'demo123','Service Advisor',  's.chen@dealership.com',      '555-100-0005', '2022-02-14', 55000, 1);
 
 -- -------------------------------------------------------------
 --  Vehicles

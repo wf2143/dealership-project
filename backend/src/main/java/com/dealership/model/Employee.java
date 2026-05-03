@@ -1,13 +1,13 @@
 package com.dealership.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 
 @Entity
-@Table(name = "employee")
+@Table(name = "app_user",
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = "username"),
+           @UniqueConstraint(columnNames = "email")
+       })
 public class Employee {
 
     @Id
@@ -15,57 +15,48 @@ public class Employee {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @Column(name = "hire_date", nullable = false)
-    private LocalDate hireDate;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
-    @Column(name = "end_date")
-    private LocalDate endDate;          // NULL means still employed
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
-    @Column(name = "salary", nullable = false)
-    private double salary;
-
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "active", nullable = false)
-    private boolean active;
+    @Column(name = "role")
+    private String role;
 
+    @Column(name = "start_date")
+    private String startDate;
 
-    public Long getId()                       { return id; }
-    public void setId(Long id)                { this.id = id; }
+    public Long getId()                         { return id; }
+    public void setId(Long id)                  { this.id = id; }
 
-    public String getName()                   { return name; }
-    public void setName(String name)          { this.name = name; }
+    public String getFirstName()                { return firstName; }
+    public void setFirstName(String firstName)  { this.firstName = firstName; }
 
-    public LocalDate getHireDate(){ 
-        return hireDate; 
-    
-    }
-    public void setHireDate(LocalDate d){ 
-        this.hireDate = d; 
-    }
+    public String getLastName()                 { return lastName; }
+    public void setLastName(String lastName)    { this.lastName = lastName; }
 
-    public LocalDate getEndDate(){ 
-        return endDate; 
-    }
-    
-    public void setEndDate(LocalDate d)       { this.endDate = d; }
+    public String getUsername()                 { return username; }
+    public void setUsername(String username)    { this.username = username; }
 
-    public double getSalary()                 { return salary; }
-    public void setSalary(double salary)      { this.salary = salary; }
+    public String getPassword()                 { return password; }
+    public void setPassword(String password)    { this.password = password; }
 
-    public String getPhone()                  { return phone; }
-    public void setPhone(String phone)        { this.phone = phone; }
+    public String getEmail()                    { return email; }
+    public void setEmail(String email)          { this.email = email; }
 
-    public String getEmail()                  { return email; }
-    public void setEmail(String email)        { this.email = email; }
+    public String getRole()                     { return role; }
+    public void setRole(String role)            { this.role = role; }
 
-    public boolean isActive()                 { return active; }
-    public void setActive(boolean active)     { this.active = active; }
+    public String getStartDate()                { return startDate; }
+    public void setStartDate(String startDate)  { this.startDate = startDate; }
 }

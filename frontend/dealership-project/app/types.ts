@@ -6,21 +6,20 @@ export type PageKey =
   | "inventory"
   | "profile";
 
-export type UserRole =
+export type EmployeeRole =
   | "Sales Associate"
   | "Finance Manager"
   | "Lot Manager"
   | "Service Advisor"
   | "General Manager";
 
-export interface AuthUser {
+export interface AuthEmployee {
   id:          number;
   firstName:   string;
   lastName?:   string;
   username:    string;
   email:       string;
-  role:        UserRole;
-  employeeId:  string;
+  role:        EmployeeRole;
   startDate:   string;
 }
 
@@ -35,7 +34,7 @@ export interface RegisterPayload {
   username:  string;
   email:     string;
   password:  string;
-  role:      UserRole;
+  role:      EmployeeRole;
 }
 
 export type VehicleStatus = "available" | "hold" | "sold" | "incoming";
@@ -88,12 +87,6 @@ export interface AlertItem {
   boldPrefix: string;
   message:    string;
   critical:   boolean;
-}
-
-export interface EmployeeStats {
-  vehiclesAdded: number;
-  salesClosed:   number;
-  appraisals:    number;
 }
 
 export interface ActivityLog {

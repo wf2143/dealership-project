@@ -1,21 +1,20 @@
 "use client";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { AuthUser } from "../app/types";
+import { useState, useEffect, ChangeEvent } from "react";
+import { AuthEmployee } from "../app/types";
 import api from "../api/axiosinstance";
 
 interface ProfileProps {
-  user: AuthUser;
+  user: AuthEmployee;
 }
 
-interface EmployeeProfile {
+interface UserProfile {
   id: number;
   firstName: string;
   lastName: string;
   username: string;
   email: string;
   role: string;
-  hireDate: string;
-  active: boolean;
+  startDate: string;
 }
 
 type TabKey = "edit" | "security";
@@ -30,7 +29,7 @@ export default function Profile({ user }: ProfileProps) {
   const [tab, setTab]             = useState<TabKey>("edit");
   const [saved, setSaved]         = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string>("");
-  const [profile, setProfile]     = useState<EmployeeProfile | null>(null);
+  const [profile, setProfile]     = useState<UserProfile | null>(null);
   const [editForm, setEditForm]   = useState({
     firstName: "",
     lastName:  "",
@@ -44,7 +43,7 @@ export default function Profile({ user }: ProfileProps) {
   const [pwSaved, setPwSaved]     = useState<boolean>(false);
 
   useEffect(() => {
-    api.get<EmployeeProfile>(`/api/employees/${user.id}`)
+    api.get<UserProfile>(`/api/users/${user.id}`)
       .then((res) => {
         setProfile(res.data);
         setEditForm({
@@ -70,21 +69,19 @@ export default function Profile({ user }: ProfileProps) {
     username:  user.username,
     email:     user.email,
     role:      user.role,
-    hireDate:  user.startDate,
-    active:    true,
+    startDate: user.startDate,
     id:        user.id,
   };
 
   const initials =
     `${displayUser.firstName?.[0] ?? ""}${displayUser.lastName?.[0] ?? ""}`.toUpperCase();
 
-  // Save profile edits
-  const handleSave = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setSaveError("");
     try {
-      const res = await api.put<EmployeeProfile>(
-        `/api/employees/${user.id}`,
+      const res = await api.put<UserProfile>(
+        `/api/users/${user.id}`,
         editForm
       );
       setProfile(res.data);
@@ -96,7 +93,7 @@ export default function Profile({ user }: ProfileProps) {
   };
 
   const handlePasswordChange = async (
-    e: FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
     setPwError("");
@@ -113,7 +110,7 @@ export default function Profile({ user }: ProfileProps) {
       return;
     }
     try {
-      await api.put(`/api/employees/${user.id}/password`, {
+      await api.put(`/api/users/${user.id}/password`, {
         currentPassword: pwForm.current,
         newPassword:     pwForm.next,
       });
@@ -125,19 +122,18 @@ export default function Profile({ user }: ProfileProps) {
     }
   };
 
-  const handleDeactivate = async (): Promise<void> => {
+  const handleDelete = async (): Promise<void> => {
     if (
       !window.confirm(
-        "Are you sure you want to deactivate your account? " +
-        "A manager will need to restore access."
+        "Are you sure you want to delete your account? This cannot be undone."
       )
     )
       return;
     try {
-      await api.delete(`/api/employees/${user.id}`);
+      await api.delete(`/api/users/${user.id}`);
       window.location.reload();
     } catch {
-      setSaveError("Could not deactivate account.");
+      setSaveError("Could not delete account.");
     }
   };
 
@@ -225,18 +221,10 @@ export default function Profile({ user }: ProfileProps) {
                   />
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Employee ID</label>
-                  <input
-                    className="field-input"
-                    value={user.employeeId}
-                    disabled
-                  />
-                </div>
-                <div className="field-group">
                   <label className="field-label">Start Date</label>
                   <input
                     className="field-input"
-                    value={displayUser.hireDate}
+                    value={displayUser.startDate}
                     disabled
                   />
                 </div>
@@ -300,8 +288,8 @@ export default function Profile({ user }: ProfileProps) {
 
               <div className="danger-zone">
                 <div className="danger-title">Danger Zone</div>
-                <button className="btn-danger" onClick={handleDeactivate}>
-                  Deactivate Account
+                <button className="btn-danger" onClick={handleDelete}>
+                  Delete Account
                 </button>
               </div>
             </div>

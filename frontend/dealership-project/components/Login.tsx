@@ -1,10 +1,10 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
-import { AuthUser, UserRole } from "../app/types";
+import { AuthEmployee, EmployeeRole } from "../app/types";
 import api from "../api/axiosinstance";
 
 interface LoginProps {
-  onLogin: (user: AuthUser) => void;
+  onLogin: (user: AuthEmployee) => void;
   onNavigateSignup: () => void;
 }
 
@@ -20,11 +20,10 @@ interface UserResponse {
   username: string;
   email: string;
   role: string;
-  employeeId?: string;
   startDate?: string;
 }
 
-export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
+export default function Login({ onLogin }: LoginProps) {
   const [form, setForm]       = useState<LoginForm>({ username: "", password: "" });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError]     = useState<string>("");
@@ -42,20 +41,19 @@ export default function Login({ onLogin, onNavigateSignup }: LoginProps) {
     }
     setLoading(true);
     try {
-      const res = await api.post<UserResponse>("/api/users/login", {
+      const res = await api.post<UserResponse>("/api/employees/login", {
         username: form.username,
         password: form.password,
       });
       const user = res.data;
-      const authUser: AuthUser = {
-        id:         user.id,
-        firstName:  user.firstName,
-        lastName:   user.lastName,
-        username:   user.username,
-        email:      user.email,
-        role:       user.role as UserRole,
-        employeeId: user.employeeId || `EMP-${String(user.id).padStart(4, "0")}`,
-        startDate:  user.startDate || "",
+      const authUser: AuthEmployee = {
+        id:        user.id,
+        firstName: user.firstName,
+        lastName:  user.lastName,
+        username:  user.username,
+        email:     user.email,
+        role:      user.role as EmployeeRole,
+        startDate: user.startDate || "",
       };
       onLogin(authUser);
     } catch {

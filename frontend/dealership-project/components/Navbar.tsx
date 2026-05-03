@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { AuthUser, PageKey } from "../app/types";
+import { AuthEmployee, PageKey } from "../app/types";
 
 const NAV_ITEMS: { key: PageKey; label: string }[] = [
   { key: "welcome",   label: "Dashboard"  },
@@ -10,7 +10,7 @@ const NAV_ITEMS: { key: PageKey; label: string }[] = [
 ];
 
 interface NavbarProps {
-  user: AuthUser;
+  user: AuthEmployee;
   activePage: PageKey;
   onNavigate: (page: PageKey) => void;
   onLogout: () => void;

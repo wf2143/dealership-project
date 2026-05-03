@@ -6,6 +6,8 @@ const NAV_ITEMS: { key: PageKey; label: string }[] = [
   { key: "welcome",   label: "Dashboard"  },
   { key: "lot",       label: "On the Lot" },
   { key: "inventory", label: "Inventory"  },
+  { key: "customers", label: "Customers"  },
+  { key: "sales",     label: "Sales"      },
   { key: "profile",   label: "My Profile" },
 ];
 

@@ -4,6 +4,8 @@ export type PageKey =
   | "welcome"
   | "lot"
   | "inventory"
+  | "customers"
+  | "sales"
   | "profile";
 
 export type EmployeeRole =
@@ -94,6 +96,22 @@ export interface ActivityLog {
   action:    string;
   detail:    string;
   createdAt: string; 
+}
+
+export interface Customer {
+  customerId: number;
+  name:       string;
+  phone:      string;
+  email:      string;
+}
+
+export interface SaleTransaction {
+  transactionId: number;
+  date:          string | number[];
+  amount:        number;
+  paymentType:   string;
+  customer:      Customer;
+  vehicle:       Vehicle;
 }
 
 export interface ChangePasswordPayload {

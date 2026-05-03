@@ -6,6 +6,8 @@ import Navbar from '../components/Navbar';
 import Welcome from '../components/Welcome';
 import CurrentLot from '../components/Lot';
 import Inventory from '../components/Inventory';
+import Customers from '../components/Customers';
+import Sales from '../components/Sales';
 import Profile from '../components/myProfile';
 import { AuthEmployee, PageKey } from "./types";
 
@@ -42,6 +44,10 @@ export default function App(): ReactElement {
         return <CurrentLot userRole={user.role} />;
       case "inventory":
         return <Inventory userRole={user.role} />;
+      case "customers":
+        return <Customers userRole={user.role} />;
+      case "sales":
+        return <Sales userRole={user.role} />;
       case "profile":
         return <Profile user={user} />;
       default:

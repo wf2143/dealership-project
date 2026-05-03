@@ -20,7 +20,7 @@ interface CurrentLotProps {
   userRole: string;
 }
 
-export default function CurrentLot({ userRole }: CurrentLotProps) {
+export default function CurrentLot({ userRole: _ }: CurrentLotProps) {
   const [vehicles, setVehicles]         = useState<Vehicle[]>([]);
   const [loading, setLoading]           = useState<boolean>(true);
   const [error, setError]               = useState<string>("");
@@ -49,53 +49,31 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
     return matchSearch && matchStatus && matchMake;
   });
 
-  const canAddVehicle = ["General Manager", "Lot Manager"].includes(userRole);
-
   if (loading) {
-    return (
-      <div className="lot-root" style={{ padding: "60px", textAlign: "center" }}>
-        Loading lot…
-      </div>
-    );
+    return <div className="lot-root" style={{ padding: "40px" }}>Loading lot…</div>;
   }
 
   return (
     <div className="lot-root">
-
-      {/* Header — no Export CSV button */}
       <div className="lot-header">
-        <div>
-          <div className="page-title">Current Lot</div>
-        </div>
-        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          {error && (
-            <span style={{ color: "#e74c3c", fontSize: "13px" }}>{error}</span>
-          )}
-          {canAddVehicle && (
-            <button className="btn-primary">+ Add Vehicle</button>
-          )}
-        </div>
+        <div className="page-title">Current Lot</div>
+        {error && <span style={{ color: "#e74c3c", fontSize: "13px" }}>{error}</span>}
       </div>
 
-      {/* Filters */}
       <div className="filters-bar">
         <div className="search-box">
           <input
             className="search-input"
             placeholder="Search make, model, color..."
             value={search}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
           />
         </div>
 
         <select
           className="filter-select"
           value={statusFilter}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            setStatusFilter(e.target.value)
-          }
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
         >
           <option value="all">All Status</option>
           <option value="available">Available</option>
@@ -107,20 +85,15 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
         <select
           className="filter-select"
           value={makeFilter}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            setMakeFilter(e.target.value)
-          }
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => setMakeFilter(e.target.value)}
         >
           <option value="all">All Makes</option>
-          {makes.map((m) => (
-            <option key={m} value={m}>{m}</option>
-          ))}
+          {makes.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
 
         <div className="results-count">{filtered.length} vehicles</div>
       </div>
 
-      {/* Card grid */}
       <div className="lot-grid">
         {filtered.length === 0 ? (
           <div className="empty-state">
@@ -129,55 +102,22 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
         ) : (
           filtered.map((v) => (
             <div key={v.id} className="vehicle-card">
-
-              {/* Car image with PNG placeholder fallback */}
-              <div className="card-image">
-                <img
-                  className="card-img"
-                  src="/cars/placeholder.png"
-                  alt={`${v.year} ${v.make} ${v.model}`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                    const ph = e.currentTarget.nextSibling as HTMLElement;
-                    if (ph) ph.style.display = "flex";
-                  }}
-                />
-                <div className="card-img-placeholder" style={{ display: "none" }}>
-                  <div className="placeholder-label">Image coming soon</div>
-                </div>
-
-                <div
-                  className={`card-badge ${BADGE_CLASS[v.status as VehicleStatus]}`}
-                >
-                  {STATUS_LABELS[v.status as VehicleStatus]}
-                </div>
-                <div className="lot-tag">{v.lot}</div>
-              </div>
-
-              {/* Card body */}
               <div className="card-body">
+                <span className={`card-badge ${BADGE_CLASS[v.status as VehicleStatus]}`}>
+                  {STATUS_LABELS[v.status as VehicleStatus]}
+                </span>
+                <span className="lot-tag" style={{ marginLeft: "8px" }}>Lot {v.lot}</span>
                 <div className="card-year">{v.year}</div>
                 <div className="card-name">{v.make} {v.model}</div>
                 <div className="card-specs">
-                  <span className="card-spec">Color: {v.color}</span>
-                  <span className="card-spec">
-                    {v.mileage.toLocaleString()} mi
-                  </span>
+                  <span className="card-spec">{v.trim}</span>
+                  <span className="card-spec">{v.color}</span>
+                  <span className="card-spec">{v.mileage.toLocaleString()} mi</span>
                 </div>
                 <div className="card-footer">
-                  <div className="card-price">
-                    ${v.price.toLocaleString()}
-                  </div>
+                  <div className="card-price">${v.price.toLocaleString()}</div>
                   <div className="card-days">{v.daysOnLot}d on lot</div>
                 </div>
-              </div>
-
-              {/* Hover actions */}
-              <div className="card-actions">
-                <button className="mini-btn mini-btn-outline">Details</button>
-                {canAddVehicle && (
-                  <button className="mini-btn mini-btn-fill">Edit</button>
-                )}
               </div>
             </div>
           ))

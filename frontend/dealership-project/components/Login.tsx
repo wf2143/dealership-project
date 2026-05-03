@@ -13,7 +13,7 @@ interface LoginForm {
   password: string;
 }
 
-interface UserResponse {
+interface EmployeeResponse {
   id: number;
   firstName: string;
   lastName: string;
@@ -41,21 +41,21 @@ export default function Login({ onLogin }: LoginProps) {
     }
     setLoading(true);
     try {
-      const res = await api.post<UserResponse>("/api/employees/login", {
+      const res = await api.post<EmployeeResponse>("/api/employees/login", {
         username: form.username,
         password: form.password,
       });
-      const user = res.data;
-      const authUser: AuthEmployee = {
-        id:        user.id,
-        firstName: user.firstName,
-        lastName:  user.lastName,
-        username:  user.username,
-        email:     user.email,
-        role:      user.role as EmployeeRole,
-        startDate: user.startDate || "",
+      const emp = res.data;
+      const authEmployee: AuthEmployee = {
+        id:        emp.id,
+        firstName: emp.firstName,
+        lastName:  emp.lastName,
+        username:  emp.username,
+        email:     emp.email,
+        role:      emp.role as EmployeeRole,
+        startDate: emp.startDate || "",
       };
-      onLogin(authUser);
+      onLogin(authEmployee);
     } catch {
       setError("Invalid username or password.");
     } finally {
@@ -65,15 +65,8 @@ export default function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="login-root">
-      <div className="login-bg-art" />
-
-      <div className="login-left">
-        <div className="login-dealer-name">Mario&apos;s<br />Auto Sales</div>
-      </div>
-
-      {/* Right — form panel */}
-      <div className="login-right">
-        <div className="form-title">Employee Login</div>
+      <div className="login-card">
+        <div className="login-title">Mario&apos;s Auto Sales — Login</div>
 
         {error && <div className="error-msg">{error}</div>}
 

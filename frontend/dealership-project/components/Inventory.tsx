@@ -18,18 +18,13 @@ const STATUS_CLASS: Record<VehicleStatus, string> = {
 
 const fmt = (n: number): string => `$${n.toLocaleString()}`;
 
-interface TableVehicle extends Vehicle {
-  image: string;
-}
-
-const BLANK: Omit<TableVehicle, "id" | "daysOnLot"> = {
+const BLANK: Omit<Vehicle, "id" | "daysOnLot"> = {
   vin: "", year: new Date().getFullYear(), make: "", model: "", trim: "",
   color: "", mileage: 0, price: 0, status: "available", lot: "",
-  image: "/cars/placeholder.png",
 };
 
 type SortKey = keyof Pick<
-  TableVehicle,
+  Vehicle,
   "year" | "make" | "model" | "mileage" | "price" | "daysOnLot" | "status"
 >;
 
@@ -44,13 +39,9 @@ interface ThProps {
 const Th = ({ col, label, sortKey, sortDir, onSort }: ThProps) => (
   <th
     onClick={() => onSort(col)}
-    style={{
-      color:   sortKey === col ? "var(--gold)" : undefined,
-      opacity: sortKey === col ? 1 : undefined,
-    }}
+    style={{ color: sortKey === col ? "#222" : undefined, fontWeight: sortKey === col ? 800 : undefined }}
   >
-    {label}
-    {sortKey === col ? (sortDir === 1 ? " ↑" : " ↓") : ""}
+    {label}{sortKey === col ? (sortDir === 1 ? " ↑" : " ↓") : ""}
   </th>
 );
 
@@ -59,29 +50,24 @@ interface InventoryProps {
 }
 
 export default function Inventory({ userRole }: InventoryProps) {
-  const [inventory, setInventory] = useState<TableVehicle[]>([]);
+  const [inventory, setInventory] = useState<Vehicle[]>([]);
   const [loading, setLoading]     = useState<boolean>(true);
   const [error, setError]         = useState<string>("");
   const [search, setSearch]       = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [makeFilter, setMakeFilter]     = useState<string>("all");
-  const [modal, setModal]         = useState<TableVehicle | "add" | null>(null);
-  const [form, setForm]           = useState<Omit<TableVehicle, "id" | "daysOnLot">>(BLANK);
+  const [modal, setModal]         = useState<Vehicle | "add" | null>(null);
+  const [form, setForm]           = useState<Omit<Vehicle, "id" | "daysOnLot">>(BLANK);
   const [sortKey, setSortKey]     = useState<SortKey>("year");
-  const [sortDir, setSortDir]     = useState<1 | -1>(-1); // newest first
+  const [sortDir, setSortDir]     = useState<1 | -1>(-1);
 
   const isManager = [
     "General Manager", "Lot Manager", "Finance Manager",
   ].includes(userRole);
 
-  // Load inventory from DB on mount
   useEffect(() => {
     api.get<Vehicle[]>("/api/vehicles")
-      .then((res) => {
-        setInventory(
-          res.data.map((v) => ({ ...v, image: "/cars/placeholder.png" }))
-        );
-      })
+      .then((res) => setInventory(res.data))
       .catch(() => setError("Failed to load inventory."))
       .finally(() => setLoading(false));
   }, []);
@@ -113,7 +99,7 @@ export default function Inventory({ userRole }: InventoryProps) {
     });
 
   const openAdd  = (): void => { setForm(BLANK); setModal("add"); };
-  const openEdit = (v: TableVehicle): void => { setForm({ ...v }); setModal(v); };
+  const openEdit = (v: Vehicle): void => { setForm({ ...v }); setModal(v); };
   const closeModal = (): void => setModal(null);
 
   const handleFormChange = (
@@ -132,14 +118,8 @@ export default function Inventory({ userRole }: InventoryProps) {
 
     if (modal === "add") {
       try {
-        const res = await api.post<Vehicle>("/api/vehicles", {
-          ...payload,
-          daysOnLot: 0,
-        });
-        setInventory([
-          { ...res.data, image: "/cars/placeholder.png" },
-          ...inventory,
-        ]);
+        const res = await api.post<Vehicle>("/api/vehicles", { ...payload, daysOnLot: 0 });
+        setInventory([res.data, ...inventory]);
       } catch {
         setError("Failed to add vehicle.");
       }
@@ -149,11 +129,7 @@ export default function Inventory({ userRole }: InventoryProps) {
           `/api/vehicles/${modal.id}`,
           { ...payload, daysOnLot: modal.daysOnLot }
         );
-        setInventory(
-          inventory.map((v) =>
-            v.id === modal.id ? { ...res.data, image: v.image } : v
-          )
-        );
+        setInventory(inventory.map((v) => v.id === modal.id ? res.data : v));
       } catch {
         setError("Failed to update vehicle.");
       }
@@ -171,40 +147,26 @@ export default function Inventory({ userRole }: InventoryProps) {
     }
   };
 
-  const currentVehicle =
-    modal && typeof modal === "object" ? modal : null;
+  const currentVehicle = modal && typeof modal === "object" ? modal : null;
 
   if (loading) {
-    return (
-      <div className="inv-root" style={{ padding: "60px", textAlign: "center" }}>
-        Loading inventory…
-      </div>
-    );
+    return <div className="inv-root" style={{ padding: "40px" }}>Loading inventory…</div>;
   }
 
   return (
     <>
       <div className="inv-root">
-
         <div className="inv-topbar">
-          <div>
-            <div className="page-title">Full Inventory</div>
-          </div>
+          <div className="page-title">Full Inventory</div>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            {error && (
-              <span style={{ color: "#e74c3c", fontSize: "13px" }}>{error}</span>
-            )}
+            {error && <span style={{ color: "#e74c3c", fontSize: "13px" }}>{error}</span>}
             {isManager && (
-              <button className="btn-primary" onClick={openAdd}>
-                + Add Vehicle
-              </button>
+              <button className="btn-primary" onClick={openAdd}>+ Add Vehicle</button>
             )}
           </div>
         </div>
 
         <div className="inv-content">
-
-          {/* Filter sidebar */}
           <div className="filter-sidebar">
             <div className="filter-heading">Status</div>
             {(
@@ -226,37 +188,27 @@ export default function Inventory({ userRole }: InventoryProps) {
             ))}
 
             <div className="filter-heading">Make</div>
-            {[["all", "All Makes"], ...MAKES.map((m) => [m, m])].map(
-              ([val, lbl]) => (
-                <div
-                  key={val}
-                  className={`filter-chip${makeFilter === val ? " active" : ""}`}
-                  onClick={() => setMakeFilter(val)}
-                >
-                  {lbl}
-                </div>
-              )
-            )}
+            {[["all", "All Makes"], ...MAKES.map((m) => [m, m])].map(([val, lbl]) => (
+              <div
+                key={val}
+                className={`filter-chip${makeFilter === val ? " active" : ""}`}
+                onClick={() => setMakeFilter(val)}
+              >
+                {lbl}
+              </div>
+            ))}
 
-            <button
-              className="clear-btn"
-              onClick={() => {
-                setStatusFilter("all");
-                setMakeFilter("all");
-                setSearch("");
-              }}
-            >
+            <button className="clear-btn" onClick={() => { setStatusFilter("all"); setMakeFilter("all"); setSearch(""); }}>
               Clear Filters
             </button>
           </div>
 
-          {/* Table area */}
           <div className="table-area">
             <div className="table-toolbar">
               <div className="search-box">
                 <input
                   className="search-input"
-                  placeholder="Search make, model..."
+                  placeholder="Search make, model, VIN..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -267,14 +219,13 @@ export default function Inventory({ userRole }: InventoryProps) {
             <table className="inv-table">
               <thead>
                 <tr>
-                  <th style={{ width: 68 }}>Photo</th>
                   <Th col="year"      label="Year"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <Th col="make"      label="Make / Model" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th>VIN</th>
                   <Th col="mileage"   label="Mileage"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <Th col="price"     label="Price"        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <Th col="status"    label="Status"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
-                  <th>Location</th>
+                  <th>Lot</th>
                   <Th col="daysOnLot" label="Days"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th></th>
                 </tr>
@@ -282,24 +233,10 @@ export default function Inventory({ userRole }: InventoryProps) {
               <tbody>
                 {filtered.map((v) => (
                   <tr key={v.id} onClick={() => openEdit(v)}>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <img
-                        className="td-thumb"
-                        src={v.image}
-                        alt={`${v.year} ${v.make} ${v.model}`}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                          const next = e.currentTarget.nextSibling as HTMLElement;
-                          if (next) next.style.display = "flex";
-                        }}
-                      />
-                    </td>
                     <td className="td-main">{v.year}</td>
                     <td>
                       <div className="td-main">{v.make} {v.model}</div>
-                      <div style={{ fontSize: "11px", color: "var(--chrome)", opacity: 0.38, marginTop: "2px" }}>
-                        {v.trim}
-                      </div>
+                      <div style={{ fontSize: "11px", color: "#aaa" }}>{v.trim}</div>
                     </td>
                     <td className="td-vin">{v.vin}</td>
                     <td>{v.mileage.toLocaleString()} mi</td>
@@ -312,33 +249,16 @@ export default function Inventory({ userRole }: InventoryProps) {
                     <td>{v.lot}</td>
                     <td
                       style={{
-                        color:
-                          v.daysOnLot > 60
-                            ? "#e74c3c"
-                            : v.daysOnLot > 30
-                            ? "#e67e22"
-                            : "var(--chrome)",
+                        color: v.daysOnLot > 60 ? "#e74c3c" : v.daysOnLot > 30 ? "#e67e22" : undefined,
                       }}
                     >
                       {v.daysOnLot}d
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div className="row-actions">
-                        <button
-                          className="icon-btn"
-                          onClick={() => openEdit(v)}
-                          title="Edit"
-                        >
-                          E
-                        </button>
+                        <button className="icon-btn" onClick={() => openEdit(v)} title="Edit">E</button>
                         {isManager && (
-                          <button
-                            className="icon-btn danger"
-                            onClick={() => handleDelete(v.id)}
-                            title="Delete"
-                          >
-                            D
-                          </button>
+                          <button className="icon-btn danger" onClick={() => handleDelete(v.id)} title="Delete">D</button>
                         )}
                       </div>
                     </td>
@@ -353,35 +273,9 @@ export default function Inventory({ userRole }: InventoryProps) {
       {modal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-
-            {currentVehicle ? (
-              <>
-                <img
-                  className="modal-image"
-                  src={currentVehicle.image}
-                  alt={`${currentVehicle.year} ${currentVehicle.make} ${currentVehicle.model}`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                    const next = e.currentTarget.nextSibling as HTMLElement;
-                    if (next) next.style.display = "flex";
-                  }}
-                />
-                <div
-                  className="modal-image-placeholder"
-                  style={{ display: "none" }}
-                >
-                </div>
-              </>
-            ) : (
-              <div className="modal-image-placeholder">
-                <div className="modal-ph-icon"></div>
-                <div className="modal-ph-label">New vehicle — add PNG later</div>
-              </div>
-            )}
-
             <div className="modal-header">
               <div className="modal-title">
-                {modal === "add" ? "Add Vehicle" : "Edit Vehicle"}
+                {modal === "add" ? "Add Vehicle" : `Edit — ${currentVehicle?.year} ${currentVehicle?.make} ${currentVehicle?.model}`}
               </div>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
@@ -390,13 +284,7 @@ export default function Inventory({ userRole }: InventoryProps) {
               <div className="modal-grid">
                 <div className="m-field full">
                   <label className="m-label">VIN</label>
-                  <input
-                    className="m-input"
-                    name="vin"
-                    value={form.vin}
-                    onChange={handleFormChange}
-                    placeholder="17-character VIN"
-                  />
+                  <input className="m-input" name="vin" value={form.vin} onChange={handleFormChange} placeholder="17-character VIN" />
                 </div>
                 {(
                   [
@@ -416,27 +304,16 @@ export default function Inventory({ userRole }: InventoryProps) {
                       className="m-input"
                       name={name}
                       type={type}
-                      value={
-                        (form as Record<string, unknown>)[name] as string ?? ""
-                      }
+                      value={(form as Record<string, unknown>)[name] as string ?? ""}
                       onChange={handleFormChange}
                     />
                   </div>
                 ))}
                 <div className="m-field">
                   <label className="m-label">Status</label>
-                  <select
-                    className="m-select"
-                    name="status"
-                    value={form.status}
-                    onChange={handleFormChange}
-                  >
-                    {(
-                      ["available", "hold", "sold", "incoming"] as VehicleStatus[]
-                    ).map((s) => (
-                      <option key={s} value={s}>
-                        {STATUS_LABELS[s]}
-                      </option>
+                  <select className="m-select" name="status" value={form.status} onChange={handleFormChange}>
+                    {(["available", "hold", "sold", "incoming"] as VehicleStatus[]).map((s) => (
+                      <option key={s} value={s}>{STATUS_LABELS[s]}</option>
                     ))}
                   </select>
                 </div>
@@ -444,9 +321,7 @@ export default function Inventory({ userRole }: InventoryProps) {
             </div>
 
             <div className="modal-footer">
-              <button className="btn-outline" onClick={closeModal}>
-                Cancel
-              </button>
+              <button className="btn-outline" onClick={closeModal}>Cancel</button>
               <button className="btn-primary" onClick={handleSave}>
                 {modal === "add" ? "Add to Inventory" : "Save Changes"}
               </button>

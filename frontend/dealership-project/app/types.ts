@@ -51,11 +51,12 @@ export interface Vehicle {
   mileage:         number;  
   price:           number;   
   status:          VehicleStatus;
-  lot:             string;   
+  location:             string;   
   daysOnLot:       number;   
   addedByUserId?:  number;   
   createdAt?:      string;   
   updatedAt?:      string;   
+  image?:          string;
 }
 
 

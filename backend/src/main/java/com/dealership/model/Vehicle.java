@@ -12,6 +12,9 @@ public class Vehicle {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "vin", unique = true, nullable = false)
+    private String vin;
+
     @Column(name = "make", nullable = false)
     private String make;
 
@@ -26,6 +29,12 @@ public class Vehicle {
 
     @Column(name = "mileage", nullable = false)
     private int mileage;
+
+    @Column(name = "daysOnLot", nullable = false)
+    private int daysOnLot;
+
+    @Column(name = "location")
+    private String location;
 
     @Column(name = "price", nullable = false)
     private double price;
@@ -45,6 +54,9 @@ public class Vehicle {
     @Column(name = "change_date")
     private LocalDate changeDate;
 
+    @Column(name = "image", columnDefinition = "LONGTEXT")
+    private String image;
+
     @PrePersist
     protected void onCreate() {
         this.addDate    = LocalDate.now();
@@ -58,6 +70,10 @@ public class Vehicle {
 
     public Long getId()                       { return id; }
     public void setId(Long id)                { this.id = id; }
+
+    public String getVin()                    { return vin; }
+    public void setVin(String vin)            { this.vin = vin; }
+
 
     public String getMake()                   { return make; }
     public void setMake(String make)          { this.make = make; }
@@ -91,4 +107,13 @@ public class Vehicle {
 
     public LocalDate getChangeDate()          { return changeDate; }
     public void setChangeDate(LocalDate d)    { this.changeDate = d; }
+
+    public String getImage()                  { return image; }
+    public void setImage(String image)        { this.image = image; }
+
+    public String getLocation()                { return location; }
+    public void setLocation(String location)   { this.location = location; }
+    
+    public int getDaysOnLot()                { return daysOnLot; }
+    public void setDaysOnLot(int daysOnLot)   { this.daysOnLot = daysOnLot; }
 }

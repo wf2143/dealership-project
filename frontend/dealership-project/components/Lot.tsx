@@ -41,7 +41,7 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
-      `${v.year} ${v.make} ${v.model} ${v.color} ${v.lot}`
+      `${v.year} ${v.make} ${v.model} ${v.color} ${v.location}`
         .toLowerCase()
         .includes(q);
     const matchStatus = statusFilter === "all" || v.status === statusFilter;
@@ -137,16 +137,18 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
 
               {/* Car image with PNG placeholder fallback */}
               <div className="card-image">
-                <img
-                  className="card-img"
-                  src="/cars/placeholder.png"
-                  alt={`${v.year} ${v.make} ${v.model}`}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                    const ph = e.currentTarget.nextSibling as HTMLElement;
-                    if (ph) ph.style.display = "flex";
-                  }}
-                />
+                {v.image ? (
+                  <img
+                    className="card-img"
+                    src={v.image}
+                    alt={`${v.year} ${v.make} ${v.model}`}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      const ph = e.currentTarget.nextSibling as HTMLElement;
+                      if (ph) ph.style.display = "flex";
+                    }}
+                  />
+                ) : null}
                 <div className="card-img-placeholder" style={{ display: "none" }}>
                   <div className="placeholder-icon">🚗</div>
                   <div className="placeholder-label">Image coming soon</div>
@@ -157,7 +159,7 @@ export default function CurrentLot({ userRole }: CurrentLotProps) {
                 >
                   {STATUS_LABELS[v.status as VehicleStatus]}
                 </div>
-                <div className="lot-tag">{v.lot}</div>
+                <div className="lot-tag">{v.location}</div>
               </div>
 
               {/* Card body */}

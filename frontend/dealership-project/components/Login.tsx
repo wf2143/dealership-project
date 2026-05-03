@@ -5,7 +5,6 @@ import api from "../api/axiosinstance";
 
 interface LoginProps {
   onLogin: (user: AuthEmployee) => void;
-  onNavigateSignup: () => void;
 }
 
 interface LoginForm {

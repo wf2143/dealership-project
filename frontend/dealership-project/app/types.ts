@@ -1,8 +1,6 @@
 export type PageKey =
   | "login"
-  | "signup"
   | "welcome"
-  | "lot"
   | "inventory"
   | "customers"
   | "sales"
@@ -16,86 +14,30 @@ export type EmployeeRole =
   | "General Manager";
 
 export interface AuthEmployee {
-  id:          number;
-  firstName:   string;
-  lastName?:   string;
-  username:    string;
-  email:       string;
-  role:        EmployeeRole;
-  startDate:   string;
-}
-
-export interface LoginPayload {
-  username: string;
-  password: string;
-}
-
-export interface RegisterPayload {
+  id:        number;
   firstName: string;
-  lastName:  string;
+  lastName?: string;
   username:  string;
   email:     string;
-  password:  string;
   role:      EmployeeRole;
+  startDate: string;
 }
 
 export type VehicleStatus = "available" | "hold" | "sold" | "incoming";
 
 export interface Vehicle {
-  id:              number;
-  vin:             string;  
-  year:            number;   
-  make:            string;   
-  model:           string;   
-  trim:            string;   
-  color:           string;   
-  mileage:         number;  
-  price:           number;   
-  status:          VehicleStatus;
-  lot:             string;   
-  daysOnLot:       number;   
-  addedByUserId?:  number;   
-  createdAt?:      string;   
-  updatedAt?:      string;   
-}
-
-
-export type VehicleCreatePayload = Omit<
-  Vehicle,
-  "id" | "daysOnLot" | "createdAt" | "updatedAt"
->;
-
-
-export type VehicleUpdatePayload = Partial<VehicleCreatePayload>;
-
-
-export interface DashboardStats {
-  totalOnLot:         number;
-  salesThisMonth:     number;
-  avgDaysOnLot:       number;
-  pendingAppraisals:  number;
-}
-
-export interface ActivityItem {
-  id:          number;
-  icon:        string;
-  description: string;
-  detail:      string;
-  createdAt:   string; 
-}
-
-export interface AlertItem {
-  id:         number;
-  boldPrefix: string;
-  message:    string;
-  critical:   boolean;
-}
-
-export interface ActivityLog {
   id:        number;
-  action:    string;
-  detail:    string;
-  createdAt: string; 
+  vin:       string;
+  year:      number;
+  make:      string;
+  model:     string;
+  trim:      string;
+  color:     string;
+  mileage:   number;
+  price:     number;
+  status:    VehicleStatus;
+  lot:       string;
+  daysOnLot: number;
 }
 
 export interface Customer {
@@ -112,16 +54,4 @@ export interface SaleTransaction {
   paymentType:   string;
   customer:      Customer;
   vehicle:       Vehicle;
-}
-
-export interface ChangePasswordPayload {
-  currentPassword: string;
-  newPassword:     string;
-}
-
-export interface UpdateProfilePayload {
-  firstName: string;
-  lastName:  string;
-  username:  string;
-  email:     string;
 }

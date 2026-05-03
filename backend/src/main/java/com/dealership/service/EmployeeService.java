@@ -17,8 +17,6 @@ public class EmployeeService {
         this.repo = repo;
     }
 
-    // ── READ ──────────────────────────────────────────────────
-
     public List<Employee> getAll() {
         return repo.findAll();
     }
@@ -26,20 +24,6 @@ public class EmployeeService {
     public Optional<Employee> getById(Long id) {
         return repo.findById(id);
     }
-
-    public Optional<Employee> getByUsername(String username) {
-        return repo.findByUsername(username);
-    }
-
-    public Optional<Employee> getByEmail(String email) {
-        return repo.findByEmail(email);
-    }
-
-    public List<Employee> getByRole(String role) {
-        return repo.findByRole(role);
-    }
-
-    // ── CREATE ────────────────────────────────────────────────
 
     @Transactional
     public Employee save(Employee e) {
@@ -49,13 +33,6 @@ public class EmployeeService {
     public Optional<Employee> login(String username, String password) {
         return repo.findByUsername(username)
                 .filter(emp -> password.equals(emp.getPassword()));
-    }
-
-    // ── UPDATE ────────────────────────────────────────────────
-
-    @Transactional
-    public void updateRole(Long id, String role) {
-        repo.updateRole(id, role);
     }
 
     @Transactional
@@ -71,8 +48,6 @@ public class EmployeeService {
         repo.updatePassword(id, newPassword);
         return true;
     }
-
-    // ── DELETE ────────────────────────────────────────────────
 
     @Transactional
     public void delete(Long id) {

@@ -4,7 +4,6 @@ import { useState, ReactElement } from "react";
 import Login from '../components/Login';
 import Navbar from '../components/Navbar';
 import Welcome from '../components/Welcome';
-import CurrentLot from '../components/Lot';
 import Inventory from '../components/Inventory';
 import Customers from '../components/Customers';
 import Sales from '../components/Sales';
@@ -27,10 +26,7 @@ export default function App(): ReactElement {
 
   if (!user) {
     return (
-      <Login
-        onLogin={handleLogin}
-        onNavigateSignup={() => setPage("signup")}
-      />
+      <Login onLogin={handleLogin} />
     );
   }
 
@@ -40,8 +36,6 @@ export default function App(): ReactElement {
     switch (page) {
       case "welcome":
         return <Welcome user={user} onNavigate={navigate} />;
-      case "lot":
-        return <CurrentLot userRole={user.role} />;
       case "inventory":
         return <Inventory userRole={user.role} />;
       case "customers":

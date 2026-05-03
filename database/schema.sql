@@ -40,7 +40,9 @@ CREATE TABLE IF NOT EXISTS vehicle (
     fuel_type   VARCHAR(50),
     status      VARCHAR(50),
     lot         VARCHAR(10),
-    days_on_lot INT
+    days_on_lot INT,
+    add_date    DATE,
+    change_date DATE
 );
 
 -- -------------------------------------------------------------
@@ -67,23 +69,9 @@ CREATE TABLE IF NOT EXISTS `transaction` (
     CONSTRAINT fk_txn_vehicle  FOREIGN KEY (vehicle_id)  REFERENCES vehicle(id)
 );
 
--- =============================================================
---  INDEXES  (non-primary; improve common query patterns)
--- =============================================================
+-- employee login lookup by username (app_user.username already has a UNIQUE constraint,
+-- which implicitly creates an index)
 
--- vehicle queries filter heavily on status and make
-CREATE INDEX IF NOT EXISTS idx_vehicle_status   ON vehicle(status);
-CREATE INDEX IF NOT EXISTS idx_vehicle_make     ON vehicle(make);
-
--- transaction lookups by customer and date range
-CREATE INDEX IF NOT EXISTS idx_txn_customer_id  ON `transaction`(customer_id);
-CREATE INDEX IF NOT EXISTS idx_txn_date         ON `transaction`(date);
-
--- customer search by name
-CREATE INDEX IF NOT EXISTS idx_customer_name    ON customer(name);
-
--- employee login lookup by username
-CREATE INDEX IF NOT EXISTS idx_user_username    ON app_user(username);
 
 -- =============================================================
 --  VIEW: sale_summary
@@ -132,61 +120,37 @@ DELIMITER ;
 -- =============================================================
 
 -- -------------------------------------------------------------
---  Employees (app_user) – password for all demo accounts: demo123
+--  Employees (app_user) – password for all accounts: demo123
 -- -------------------------------------------------------------
 INSERT IGNORE INTO app_user
-    (id, first_name, last_name, username,   password,  role,               email,                       start_date)
+    (id,   first_name,    last_name,    username,      password,  role,               email,                          start_date)
 VALUES
-    (1,  'Gary',     'Mitchell','gmanager', 'demo123', 'General Manager',  'g.mitchell@dealership.com', '2019-03-15'),
-    (2,  'James',    'Smith',   'jsmith',   'demo123', 'Sales Associate',  'j.smith@dealership.com',    '2021-06-01'),
-    (3,  'Maria',    'Wilson',  'mwilson',  'demo123', 'Finance Manager',  'm.wilson@dealership.com',   '2020-01-10'),
-    (4,  'Tom',      'Larson',  'tlot',     'demo123', 'Lot Manager',      't.larson@dealership.com',   '2018-09-20'),
-    (5,  'Sara',     'Chen',    'stech',    'demo123', 'Service Advisor',  's.chen@dealership.com',     '2022-02-14');
+    (1001, 'Jerry',       'Mouse',      'jmouse',      'demo123', 'Sales Associate',  'j.mouse@dealership.com',       '2020-01-15'),
+    (1002, 'Tom',         'Cat',        'tcat',        'demo123', 'Finance Manager',  't.cat@dealership.com',         '2019-06-01'),
+    (1003, 'Mickey',      'Michaels',   'mmichaels',   'demo123', 'General Manager',  'm.michaels@dealership.com',    '2018-03-10'),
+    (1004, 'Minnie',      'MouseHouse', 'mmousehouse', 'demo123', 'Service Advisor',  'm.mousehouse@dealership.com',  '2021-09-20'),
+    (1005, 'Jeffrey',     'Palmer',     'jpalmer',     'demo123', 'Lot Manager',      'j.palmer@dealership.com',      '2020-11-05'),
+    (1006, 'Jean-Michel', 'Basquiat',   'jbasquiat',   'demo123', 'Sales Associate',  'j.basquiat@dealership.com',    '2022-04-18');
 
 -- -------------------------------------------------------------
 --  Vehicles
 -- -------------------------------------------------------------
 INSERT IGNORE INTO vehicle
-    (id, vin,                 make,      model,           trim,         color,           year, mileage, price,    body_type, fuel_type, status,     lot, days_on_lot)
+    (id, vin,                  make,        model,       trim, color,   year, mileage,  price,    body_type, fuel_type, status,      lot, days_on_lot)
 VALUES
-    ( 1, '1HGBH41JXMN109186','Honda',   'Civic',         'EX',         'Pearl White',   2023,   4200, 27500.00, 'Sedan',   'Gas',     'available','A',   12),
-    ( 2, '2T1BURHE0JC012345','Toyota',  'Corolla',        'LE',         'Midnight Blue', 2022,  18500, 22900.00, 'Sedan',   'Gas',     'available','A',   28),
-    ( 3, '3VWFE21C04M000001','Toyota',  'Camry',          'XSE',        'Lunar Rock',    2023,   1100, 34200.00, 'Sedan',   'Hybrid',  'available','A',    5),
-    ( 4, '1FTFW1ET5DFC10312','Ford',    'F-150',          'XLT',        'Oxford White',  2022,  32000, 41500.00, 'Truck',   'Gas',     'available','B',   45),
-    ( 5, '1GC4K0E8XGF200001','Chevy',   'Silverado',      'LT',         'Black',         2023,   8900, 46800.00, 'Truck',   'Gas',     'available','B',   19),
-    ( 6, '5FNRL6H75NB000123','Honda',   'Odyssey',        'EX-L',       'Sonic Gray',    2022,  22000, 38900.00, 'Minivan', 'Gas',     'available','B',   33),
-    ( 7, 'WBA5A5C57GD520900','BMW',     '3 Series',       '330i',       'Alpine White',  2022,  14500, 44500.00, 'Sedan',   'Gas',     'available','C',   21),
-    ( 8, 'KMHD84LF9KU100001','Hyundai', 'Elantra',        'SEL',        'Phantom Black', 2023,   3300, 24100.00, 'Sedan',   'Gas',     'available','A',    8),
-    ( 9, '1N4BL4BV2KC100001','Nissan',  'Altima',         '2.5 SV',     'Gun Metallic',  2022,  28000, 26400.00, 'Sedan',   'Gas',     'available','A',   52),
-    (10, '5TDKZ3DC8LS000001','Toyota',  'Sienna',         'XLE',        'Blizzard Pearl',2023,   6600, 48200.00, 'Minivan', 'Hybrid',  'available','B',   14),
-    (11, 'JM3KFBDM5M0400001','Mazda',   'CX-5',           'Touring',    'Soul Red',      2022,  19000, 31900.00, 'SUV',     'Gas',     'available','C',   37),
-    (12, '2HKRW2H50NH600001','Honda',   'CR-V',           'Sport',      'Radiant Red',   2023,   5500, 35700.00, 'SUV',     'Gas',     'available','C',   10),
-    (13, '1C4RJFBG8LC100001','Jeep',    'Grand Cherokee', 'Laredo',     'Diamond Black', 2022,  41000, 37200.00, 'SUV',     'Gas',     'hold',     'B',   60),
-    (14, 'WVGZZZ5NZKW000001','VW',      'Tiguan',         'SEL',        'Deep Black',    2023,   2200, 36800.00, 'SUV',     'Gas',     'hold',     'C',   17),
-    (15, '1FMCU9HD0KUA00001','Ford',    'Escape',         'Titanium',   'Rapid Red',     2022,  25000, 29900.00, 'SUV',     'Gas',     'hold',     'A',   41),
-    (16, '5YJSA1E22MF000001','Tesla',   'Model 3',        'Long Range', 'Pearl White',   2022,  31000, 49900.00, 'Sedan',   'Electric','incoming', 'C',    0),
-    (17, '2C3CDZAG0NH000001','Dodge',   'Charger',        'R/T',        'TorRed',        2023,   1800, 44700.00, 'Sedan',   'Gas',     'incoming', 'C',    0),
-    (18, '1G1BC5SM5H7000001','Chevy',   'Cruze',          'LT',         'Mosaic Black',  2021,  52000, 18400.00, 'Sedan',   'Gas',     'sold',     'A',   88),
-    (19, '3MW5R7J07L8B00001','BMW',     '2 Series',       '230i',       'Mineral White', 2021,  47000, 38100.00, 'Coupe',   'Gas',     'sold',     'C',   75),
-    (20, '1ZVBP8CF4E5000001','Ford',    'Mustang',        'GT',         'Race Red',      2021,  61000, 34500.00, 'Coupe',   'Gas',     'sold',     'B',  102);
+    (1, '1NKCMUEX8BR285459',  'Ford',       'F-150',     NULL, 'Black', 1990, 120000,  7000.00,  'Truck',   'Gas',     'available', 'A', 0),
+    (2, '1FTSF30Y75E471696',  'Honda',      'Accord',    NULL, 'Red',   2020,  30000, 25000.00,  'Sedan',   'Gas',     'available', 'A', 0),
+    (3, '2FAPP36X6JB175858',  'Chrysler',   'Sebring',   NULL, 'Blue',  2013,  59000, 21000.00,  'Coupe',   'Gas',     'available', 'B', 0),
+    (4, '1M2AM20C94M003987',  'Ford',       'Expedition',NULL, 'Black', 1990, 234000,  7500.00,  'SUV',     'Gas',     'available', 'B', 0),
+    (5, '1GCEC14Z77Z197928',  'Chevrolet',  '2500',      NULL, 'Green', 2011, 264000, 10000.00,  'Truck',   'Diesel',  'available', 'C', 0);
 
 -- -------------------------------------------------------------
 --  Customers
 -- -------------------------------------------------------------
-INSERT IGNORE INTO customer (customer_id, name,               phone,          email)
+INSERT IGNORE INTO customer (customer_id, name,              phone,          email)
 VALUES
-    (1, 'Robert Nguyen',    '555-200-0001', 'r.nguyen@email.com'),
-    (2, 'Amanda Torres',    '555-200-0002', 'a.torres@email.com'),
-    (3, 'Derek Phillips',   '555-200-0003', 'd.phillips@email.com'),
-    (4, 'Lisa Harrington',  '555-200-0004', 'l.harrington@email.com'),
-    (5, 'Kevin Oduya',      '555-200-0005', 'k.oduya@email.com');
-
--- -------------------------------------------------------------
---  Transactions  (reference the 3 sold vehicles: 18, 19, 20)
--- -------------------------------------------------------------
-INSERT IGNORE INTO `transaction`
-    (transaction_id, date,         amount,    payment_type, customer_id, vehicle_id)
-VALUES
-    (1, '2025-03-14', 18400.00, 'Finance', 1, 18),
-    (2, '2025-03-22', 38100.00, 'Finance', 3, 19),
-    (3, '2025-04-05', 34500.00, 'Cash',    2, 20);
+    (1, 'John Smith',       '555-300-0001', 'j.smith@email.com'),
+    (2, 'James Doe',        '555-300-0002', 'j.doe@email.com'),
+    (3, 'Kate Mclaughlin',  '555-300-0003', 'k.mclaughlin@email.com'),
+    (4, 'Kim Paul',         '555-300-0004', 'k.paul@email.com'),
+    (5, 'Leon Silva',       '555-300-0005', 'l.silva@email.com');

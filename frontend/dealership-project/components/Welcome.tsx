@@ -23,10 +23,10 @@ export default function Welcome({
 
       <div className="quick-actions">
         {([
-          { label: "Dashboard",  nav: "welcome"   as PageKey },
-          { label: "On the Lot", nav: "lot"       as PageKey },
-          { label: "Inventory",  nav: "inventory" as PageKey },
-          { label: "My Profile", nav: "profile"   as PageKey },
+          { label: "Inventory", nav: "inventory" as PageKey },
+          { label: "Customers", nav: "customers" as PageKey },
+          { label: "Sales", nav: "sales" as PageKey },
+          { label: "My Profile", nav: "profile" as PageKey },
         ]).map((a) => (
           <button
             key={a.label}

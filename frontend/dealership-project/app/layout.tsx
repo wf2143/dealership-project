@@ -1,7 +1,6 @@
 import '../styles/Welcome.css';
 import '../styles/Login.css';
 import '../styles/Navbar.css';
-import '../styles/Lot.css';
 import '../styles/Inventory.css';
 import '../styles/myProfile.css';
 

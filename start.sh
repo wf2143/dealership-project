@@ -36,8 +36,8 @@ done
 cleanup() {
     echo ""
     echo -e "${YELLOW}Stopping services…${NC}"
-    if [[ -n "$BACKEND_PID" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
-        kill "$BACKEND_PID" 2>/dev/null
+    if lsof -ti:8080 &>/dev/null; then
+        lsof -ti:8080 | xargs kill 2>/dev/null || true
         echo "  Backend stopped"
     fi
     if [[ -n "$FRONTEND_PID" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
@@ -46,7 +46,7 @@ cleanup() {
     fi
     exit 0
 }
-trap cleanup SIGINT SIGTERM EXIT
+trap cleanup SIGINT SIGTERM SIGHUP EXIT
 
 # ── helpers ───────────────────────────────────────────────────
 info()    { echo -e "${BLUE}▸ $*${NC}"; }
@@ -113,6 +113,13 @@ export SPRING_DATASOURCE_URL="jdbc:mysql://localhost:3306/dealership_db"
 export SPRING_DATASOURCE_USERNAME="$DB_USER"
 export SPRING_DATASOURCE_PASSWORD="$DB_PASS"
 
+# ── kill any stale process(es) on port 8080 ──────────────────
+if lsof -ti:8080 &>/dev/null; then
+    info "Killing stale process(es) on port 8080…"
+    lsof -ti:8080 | xargs kill 2>/dev/null || true
+    sleep 2
+fi
+
 # ── start backend ─────────────────────────────────────────────
 info "Starting Spring Boot backend on :8080…"
 (cd "$BACKEND_DIR" && mvn -q spring-boot:run > "$BACKEND_LOG" 2>&1) &
@@ -170,15 +177,15 @@ echo -e "${YELLOW}Press Ctrl+C to stop all services.${NC}"
 echo ""
 
 # ── keep alive ────────────────────────────────────────────────
-# monitor both child processes; exit if either dies unexpectedly
+# poll both services via HTTP; exit if either stops responding
 while true; do
-    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
-        echo -e "${RED}Backend stopped unexpectedly. See $BACKEND_LOG${NC}"
+    sleep 10
+    if ! curl -sf http://localhost:8080/api/vehicles > /dev/null 2>&1; then
+        echo -e "${RED}Backend stopped responding. See $BACKEND_LOG${NC}"
         exit 1
     fi
-    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
-        echo -e "${RED}Frontend stopped unexpectedly. See $FRONTEND_LOG${NC}"
+    if ! curl -sf http://localhost:3000 > /dev/null 2>&1; then
+        echo -e "${RED}Frontend stopped responding. See $FRONTEND_LOG${NC}"
         exit 1
     fi
-    sleep 5
 done

@@ -21,8 +21,6 @@ public class CustomerService {
         this.transactionRepo = transactionRepo;
     }
 
-    // ── READ ──────────────────────────────────────────────────
-
     public List<Customer> getAll() {
         return repo.findAll();
     }
@@ -31,53 +29,11 @@ public class CustomerService {
         return repo.findById(id);
     }
 
-    public Optional<Customer> getByEmail(String email) {
-        return repo.findByEmail(email);
-    }
-
-    public Optional<Customer> getByPhone(String phone) {
-        return repo.findByPhone(phone);
-    }
-
-    public List<Customer> searchByName(String name) {
-        return repo.searchByName(name);
-    }
-
-    public List<Customer> getCustomersWithTransactions() {
-        return repo.findCustomersWithTransactions();
-    }
-
-    public List<Customer> getCustomersWithNoTransactions() {
-        return repo.findCustomersWithNoTransactions();
-    }
-
-    // ── CREATE ────────────────────────────────────────────────
-
     @Transactional
     public Customer save(Customer c) {
         return repo.save(c);
     }
 
-    // ── UPDATE ────────────────────────────────────────────────
-
-    @Transactional
-    public void updateContactInfo(Long id, String phone, String email) {
-        repo.updateContactInfo(id, phone, email);
-    }
-
-    @Transactional
-    public void updateName(Long id, String name) {
-        repo.updateName(id, name);
-    }
-
-    // ── DELETE ────────────────────────────────────────────────
-
-    /**
-     * Deletes a customer and all their transactions first to satisfy
-     * the foreign key constraint on transaction.customer_id.
-     * Both deletions are wrapped in one transaction — if either fails,
-     * neither is committed.
-     */
     @Transactional
     public void delete(Long id) {
         transactionRepo.deleteByCustomerId(id);

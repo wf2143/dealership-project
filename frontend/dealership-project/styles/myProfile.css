@@ -125,23 +125,3 @@
   font-weight: 700;
   margin-bottom: 16px;
 }
-
-.danger-zone {
-  max-width: 420px;
-  border: 1px solid #e74c3c;
-  padding: 18px;
-  background: #fdecea;
-}
-
-.danger-title { font-size: 14px; font-weight: 600; color: #c0392b; margin-bottom: 8px; }
-
-.btn-danger {
-  background: none;
-  border: 1px solid #e74c3c;
-  color: #e74c3c;
-  font-family: inherit;
-  font-size: 13px;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-.btn-danger:hover { background: #e74c3c; color: #fff; }

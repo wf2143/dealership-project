@@ -122,20 +122,7 @@ export default function Profile({ user }: ProfileProps) {
     }
   };
 
-  const handleDelete = async (): Promise<void> => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete your account? This cannot be undone."
-      )
-    )
-      return;
-    try {
-      await api.delete(`/api/users/${user.id}`);
-      window.location.reload();
-    } catch {
-      setSaveError("Could not delete account.");
-    }
-  };
+
 
   return (
     <div className="profile-root">
@@ -285,13 +272,6 @@ export default function Profile({ user }: ProfileProps) {
                   Update Password
                 </button>
               </form>
-
-              <div className="danger-zone">
-                <div className="danger-title">Danger Zone</div>
-                <button className="btn-danger" onClick={handleDelete}>
-                  Delete Account
-                </button>
-              </div>
             </div>
           )}
         </div>

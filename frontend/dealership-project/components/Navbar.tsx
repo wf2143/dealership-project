@@ -23,7 +23,7 @@ export default function Navbar({ user, onNavigate, onLogout }: NavbarProps) {
     <>
       <nav className="navbar">
         <div className="nav-logo" onClick={() => go("welcome")}>
-          <span className="nav-logo-text">Mario&apos;s Auto Sales</span>
+          <span className="nav-logo-text">Michael&apos;s Auto Sales</span>
         </div>
 
         <div className="nav-right">

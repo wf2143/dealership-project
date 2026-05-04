@@ -65,7 +65,7 @@ export default function Login({ onLogin }: LoginProps) {
   return (
     <div className="login-root">
       <div className="login-card">
-        <div className="login-title">Mario&apos;s Auto Sales — Login</div>
+        <div className="login-title">Michael&apos;s Auto Sales — Login</div>
 
         {error && <div className="error-msg">{error}</div>}
 

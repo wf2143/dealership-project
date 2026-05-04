@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -20,6 +21,11 @@ public class VehicleController {
     @GetMapping
     public List<Vehicle> getAll() {
         return service.getAll();
+    }
+
+    @GetMapping("/summary")
+    public List<Map<String, Object>> getSummary() {
+        return service.getSummary();
     }
 
     @PostMapping

@@ -12,11 +12,17 @@ public class Vehicle {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "vin", unique = true)
+    private String vin;
+
     @Column(name = "make", nullable = false)
     private String make;
 
     @Column(name = "model", nullable = false)
     private String model;
+
+    @Column(name = "trim")
+    private String trim;
 
     @Column(name = "color")
     private String color;
@@ -36,11 +42,14 @@ public class Vehicle {
     @Column(name = "fuel_type")
     private String fuelType;
 
-    @Column(name = "add_date", updatable = false)
-    private LocalDate addDate;
-
     @Column(name = "status", nullable = false)
     private String status = "available";
+
+    @Column(name = "lot")
+    private String lot;
+
+    @Column(name = "add_date", updatable = false)
+    private LocalDate addDate;
 
     @Column(name = "change_date")
     private LocalDate changeDate;
@@ -59,11 +68,17 @@ public class Vehicle {
     public Long getId()                       { return id; }
     public void setId(Long id)                { this.id = id; }
 
+    public String getVin()                    { return vin; }
+    public void setVin(String vin)            { this.vin = vin; }
+
     public String getMake()                   { return make; }
     public void setMake(String make)          { this.make = make; }
 
     public String getModel()                  { return model; }
     public void setModel(String model)        { this.model = model; }
+
+    public String getTrim()                   { return trim; }
+    public void setTrim(String trim)          { this.trim = trim; }
 
     public String getColor()                  { return color; }
     public void setColor(String color)        { this.color = color; }
@@ -83,11 +98,14 @@ public class Vehicle {
     public String getFuelType()               { return fuelType; }
     public void setFuelType(String fuelType)  { this.fuelType = fuelType; }
 
-    public LocalDate getAddDate()             { return addDate; }
-    public void setAddDate(LocalDate d)       { this.addDate = d; }
-
     public String getStatus()                 { return status; }
     public void setStatus(String status)      { this.status = status; }
+
+    public String getLot()                    { return lot; }
+    public void setLot(String lot)            { this.lot = lot; }
+
+    public LocalDate getAddDate()             { return addDate; }
+    public void setAddDate(LocalDate d)       { this.addDate = d; }
 
     public LocalDate getChangeDate()          { return changeDate; }
     public void setChangeDate(LocalDate d)    { this.changeDate = d; }

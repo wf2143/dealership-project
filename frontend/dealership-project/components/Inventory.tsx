@@ -18,14 +18,14 @@ const STATUS_CLASS: Record<VehicleStatus, string> = {
 
 const fmt = (n: number): string => `$${n.toLocaleString()}`;
 
-const BLANK: Omit<Vehicle, "id" | "daysOnLot"> = {
+const BLANK: Omit<Vehicle, "id" | "addDate"> = {
   vin: "", year: new Date().getFullYear(), make: "", model: "", trim: "",
-  color: "", mileage: 0, price: 0, status: "available", lot: "",
+  color: "", mileage: 0, price: 0, bodyType: "", fuelType: "", status: "available", lot: "",
 };
 
 type SortKey = keyof Pick<
   Vehicle,
-  "year" | "make" | "model" | "mileage" | "price" | "daysOnLot" | "status"
+  "year" | "make" | "model" | "mileage" | "price" | "addDate" | "status"
 >;
 
 interface ThProps {
@@ -57,7 +57,7 @@ export default function Inventory({ userRole }: InventoryProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [makeFilter, setMakeFilter]     = useState<string>("all");
   const [modal, setModal]         = useState<Vehicle | "add" | null>(null);
-  const [form, setForm]           = useState<Omit<Vehicle, "id" | "daysOnLot">>(BLANK);
+  const [form, setForm]           = useState<Omit<Vehicle, "id" | "addDate">>(BLANK);
   const [sortKey, setSortKey]     = useState<SortKey>("year");
   const [sortDir, setSortDir]     = useState<1 | -1>(-1);
 
@@ -99,7 +99,11 @@ export default function Inventory({ userRole }: InventoryProps) {
     });
 
   const openAdd  = (): void => { setForm(BLANK); setModal("add"); };
-  const openEdit = (v: Vehicle): void => { setForm({ ...v }); setModal(v); };
+  const openEdit = (v: Vehicle): void => {
+    const { id: _id, addDate: _date, ...rest } = v;
+    setForm(rest);
+    setModal(v);
+  };
   const closeModal = (): void => setModal(null);
 
   const handleFormChange = (
@@ -118,7 +122,7 @@ export default function Inventory({ userRole }: InventoryProps) {
 
     if (modal === "add") {
       try {
-        const res = await api.post<Vehicle>("/api/vehicles", { ...payload, daysOnLot: 0 });
+        const res = await api.post<Vehicle>("/api/vehicles", payload);
         setInventory([res.data, ...inventory]);
       } catch {
         setError("Failed to add vehicle.");
@@ -127,7 +131,7 @@ export default function Inventory({ userRole }: InventoryProps) {
       try {
         const res = await api.put<Vehicle>(
           `/api/vehicles/${modal.id}`,
-          { ...payload, daysOnLot: modal.daysOnLot }
+          payload
         );
         setInventory(inventory.map((v) => v.id === modal.id ? res.data : v));
       } catch {
@@ -226,7 +230,7 @@ export default function Inventory({ userRole }: InventoryProps) {
                   <Th col="price"     label="Price"        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <Th col="status"    label="Status"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th>Lot</th>
-                  <Th col="daysOnLot" label="Days"         sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                  <Th col="addDate"   label="Date Added"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
                   <th></th>
                 </tr>
               </thead>
@@ -247,13 +251,7 @@ export default function Inventory({ userRole }: InventoryProps) {
                       </span>
                     </td>
                     <td>{v.lot}</td>
-                    <td
-                      style={{
-                        color: v.daysOnLot > 60 ? "#e74c3c" : v.daysOnLot > 30 ? "#e67e22" : undefined,
-                      }}
-                    >
-                      {v.daysOnLot}d
-                    </td>
+                    <td>{v.addDate ?? "—"}</td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div className="row-actions">
                         <button className="icon-btn" onClick={() => openEdit(v)} title="Edit">E</button>
@@ -288,14 +286,16 @@ export default function Inventory({ userRole }: InventoryProps) {
                 </div>
                 {(
                   [
-                    ["year",    "Year",         "number"],
-                    ["make",    "Make",         "text"  ],
-                    ["model",   "Model",        "text"  ],
-                    ["trim",    "Trim",         "text"  ],
-                    ["color",   "Color",        "text"  ],
-                    ["mileage", "Mileage",      "number"],
-                    ["price",   "Price (USD)",  "number"],
-                    ["lot",     "Lot Location", "text"  ],
+                    ["year",     "Year",         "number"],
+                    ["make",     "Make",         "text"  ],
+                    ["model",    "Model",        "text"  ],
+                    ["trim",     "Trim",         "text"  ],
+                    ["color",    "Color",        "text"  ],
+                    ["mileage",  "Mileage",      "number"],
+                    ["price",    "Price (USD)",  "number"],
+                    ["bodyType", "Body Type",    "text"  ],
+                    ["fuelType", "Fuel Type",    "text"  ],
+                    ["lot",      "Lot Location", "text"  ],
                   ] as [string, string, string][]
                 ).map(([name, label, type]) => (
                   <div key={name} className="m-field">

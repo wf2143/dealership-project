@@ -1,5 +1,4 @@
 .inv-root {
-  font-family: system-ui, sans-serif;
   padding: 24px;
 }
 
@@ -39,7 +38,7 @@
 }
 .btn-outline:hover { border-color: #999; color: #333; }
 
-.inv-content { display: flex; gap: 0; }
+.inv-content { display: flex; }
 
 .filter-sidebar {
   width: 180px;
@@ -134,7 +133,7 @@
 
 .inv-table tbody tr { border-bottom: 1px solid #eee; cursor: pointer; }
 .inv-table tbody tr:hover { background: #f5f5f5; }
-.inv-table td { padding: 10px 10px; color: #444; white-space: nowrap; }
+.inv-table td { padding: 10px; color: #444; white-space: nowrap; }
 
 .td-main  { color: #222; font-weight: 500; }
 .td-vin   { font-family: monospace; font-size: 11px; color: #888; }

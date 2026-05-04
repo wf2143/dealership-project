@@ -1,6 +1,5 @@
 .welcome-root {
   padding: 32px;
-  font-family: system-ui, sans-serif;
 }
 
 .welcome-heading {
@@ -32,7 +31,3 @@
 }
 
 .action-btn:hover { background: #f0f0f0; border-color: #999; }
-
-.action-icon  { display: none; }
-.action-sub   { display: none; }
-.action-label { font-size: 14px; }

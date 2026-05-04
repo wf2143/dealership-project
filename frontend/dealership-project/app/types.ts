@@ -35,9 +35,11 @@ export interface Vehicle {
   color:     string;
   mileage:   number;
   price:     number;
+  bodyType:  string;
+  fuelType:  string;
   status:    VehicleStatus;
   lot:       string;
-  daysOnLot: number;
+  addDate:   string;
 }
 
 export interface Customer {

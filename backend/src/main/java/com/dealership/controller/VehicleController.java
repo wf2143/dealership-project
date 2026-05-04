@@ -24,7 +24,7 @@ public class VehicleController {
 
     @PostMapping
     public Vehicle create(@RequestBody Vehicle v) {
-        return service.save(v);
+        return service.insert(v);
     }
 
     @PutMapping("/{id}")

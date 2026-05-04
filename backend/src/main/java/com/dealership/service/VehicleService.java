@@ -26,8 +26,13 @@ public class VehicleService {
     }
 
     @Transactional
-    public Vehicle save(Vehicle v) {
-        return repo.save(v);
+    public Vehicle insert(Vehicle v) {
+        repo.insertVehicle(
+            v.getVin(), v.getMake(), v.getModel(), v.getTrim(), v.getColor(),
+            v.getYear(), v.getMileage(), v.getPrice(),
+            v.getBodyType(), v.getFuelType(), v.getStatus(), v.getLot()
+        );
+        return repo.findByVin(v.getVin()).orElseThrow();
     }
 
     @Transactional

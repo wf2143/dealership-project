@@ -64,7 +64,6 @@ export default function Sales({ userRole }: SalesProps) {
         `/api/transactions/sale?customerId=${form.customerId}&vehicleId=${form.vehicleId}&amount=${form.amount}&paymentType=${encodeURIComponent(form.paymentType)}`
       );
       setTransactions([res.data, ...transactions]);
-      // Mark the vehicle as sold in the local list
       setVehicles(vehicles.map((v) =>
         v.id === Number(form.vehicleId) ? { ...v, status: "sold" } : v
       ));

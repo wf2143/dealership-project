@@ -18,7 +18,6 @@ public class Transaction {
     @Column(name = "amount", nullable = false)
     private double amount;
 
-    // e.g. 'cash', 'credit', 'finance'
     @Column(name = "payment_type")
     private String paymentType;
 
@@ -29,8 +28,6 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
-
-    // ── Getters & Setters ─────────────────────────────────────
 
     public Long getTransactionId()                  { return transactionId; }
     public void setTransactionId(Long id)           { this.transactionId = id; }
